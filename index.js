@@ -8,5 +8,5 @@ console.log(`set cron: ${menit} ${jamPagi},${jamSore} * * * ${new Date()}`)
 
 schedule(`${menit} ${jamPagi},${jamSore} * * *`, ()=>{
 	console.log(`running scheduled app: ${new Date()}`)
-	run(true)
+	init(true)
 })
