@@ -3,6 +3,7 @@ let obj = require("fs").readdirSync(require("path").join(__dirname, "lib")).redu
 module.exports = class Core {
   constructor(config) {
     this.config = config
+    this.kunjBlnIni = []
     for( let func in obj) {
       if(func.includes('_')) {
         this[func.split('_').join('')] = async (...args) => await obj[func](Object.assign({}, ...args, {that: this }))
@@ -23,6 +24,8 @@ module.exports = class Core {
     //   }
     // } 
   }
+
+  
 
   async init() {
     this.spinner.start('init apps')
