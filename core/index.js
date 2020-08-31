@@ -30,6 +30,15 @@ module.exports = class Core {
   async init() {
     this.spinner.start('init apps')
 
+    let settings = await this.getSettings()
+
+    this.config = Object.assign({}, this.config, {
+      CONSPWD: settings[0].cons_pass,
+      XCONSID: settings[0].cons_user,
+      PCAREUSR: settings[0].pcare_user,
+      PCAREPWD: settings[0].pcare_pass,
+    })
+
     // this.getTgl()
     // this.getUser()
     // this.getPlan()

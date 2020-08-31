@@ -59,7 +59,22 @@ exports._getPendaftaranProvider = async({
   
       let { 
         response 
-      } = await new Promise(resolve =>  client.get(apiURL, args, data => resolve(data) ) );
+      } = await new Promise((resolve, reject) =>  {
+        let req = client.get(apiURL, args, data => resolve(data) )
+        req.on('requestTimeout', function (req) {
+          reject('request has expired');
+          req.abort();
+        });
+        
+        req.on('responseTimeout', function (res) {
+          reject('response has expired');
+        });
+        
+        //it's usefull to handle request errors to avoid, for example, socket hang up errors on request timeouts
+        req.on('error', function (err) {
+          reject('request error', err);
+        });
+      });
       if (response) {
         // console.log(response)
         if (response.count) {
@@ -73,12 +88,15 @@ exports._getPendaftaranProvider = async({
       }
     } while (listAll.length < countAll);
 
-    that.spinner.succeed(`pendaftaran tgl ${tanggal}: ${listAll.length}`)
+    that.spinner.start(`pendaftaran tgl ${tanggal}: ${listAll.length}`)
 
     return listAll;
         
   }catch(e){
     that.spinner.fail(e)
+    return that.getPendaftaranProvider({
+      tanggal
+    })
   }
 
 }
@@ -89,12 +107,14 @@ exports._getPeserta = async({
   try {
     let blnThn = that.blnThnGetPst()
     let kunjBlnIni = []
-    let tgl = that.tglBlnLalu()
+    let tanggal = that.tglBlnLalu()
 
-    while(!tgl.includes(blnThn)) {
-      let kunjHariIni = await that.getPendaftaranProvider(tgl)
+    while(!tanggal.includes(blnThn)) {
+      let kunjHariIni = await that.getPendaftaranProvider({
+        tanggal
+      })
       kunjBlnIni = [...kunjBlnIni, ...kunjHariIni]
-      tgl = that.tglKmrn(tgl)
+      tanggal = that.tglKmrn(tanggal)
     }
 
     const kartuList = kunjBlnIni.map( ({

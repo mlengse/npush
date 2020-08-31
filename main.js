@@ -8,14 +8,16 @@ const app = new Core(config)
 
 module.exports = async (isPM2) => {
   try{
+    await app.init()
     let tgl = app.tgl()
     while(tgl){
       let tglHariIni = `${tgl}-${app.blnThn()}`
       let kunjHariIni = await app.getPendaftaranProvider({
         tanggal: tglHariIni
       })
+      // console.log(kunjHariIni)
       app.kunjBlnIni = [ ...app.kunjBlnIni, ...kunjHariIni]
-      app.spinner.succeed(`kunj total bln ${app.blnThn()}: ${app.kunjBlnIni.length}`)
+      app.spinner.start(`kunj total bln ${app.blnThn()}: ${app.kunjBlnIni.length}`)
       tgl--
     }
 
@@ -38,9 +40,13 @@ module.exports = async (isPM2) => {
         .trim();
         */
 
+        // console.log(pembagi, kekurangan)
 
-      if(pembagi > 0 ) {
-        const akanDiinput = Math.floor((kekurangan / pembagi) * 0.6);
+      if(pembagi > 0 || kekurangan > 0 ) {
+        let akanDiinput = Math.floor((kekurangan / pembagi) * 0.6);
+        if(pembagi < 1){
+          akanDiinput = kekurangan
+        }
         app.spinner.succeed(`akan diinput: ${akanDiinput}`)
 
 
@@ -56,10 +62,13 @@ module.exports = async (isPM2) => {
           app.spinner.succeed(`jml pst blm diinput: ${listReady.length}`);
 
           const randomList = app.getRandomSubarray(listReady, akanDiinput)
+
+          app.spinner.succeed(`random list ready: ${randomList.length}`)
+
           
           const detailList = randomList.map( no => ({
-            "kdProviderPeserta": process.env.PCAREUSR,
-            "tglDaftar": moment().add(-3, 'd').format('DD-MM-YYYY'),
+            "kdProviderPeserta": app.config.PCAREUSR,
+            "tglDaftar": app.tglDaftar(),
             "noKartu": no,
             "kdPoli": '021',
             "keluhan": null,
@@ -73,11 +82,14 @@ module.exports = async (isPM2) => {
             "rujukBalik": 0,
             "kdTkp": '10'
           }))
-  
-          for(let kunj of detailList) {
-              app.spinner.start(`add pendaftaran: ${kunj.noKartu}`)
-              let response = await app.addPendaftaran(kunj)
-              if(response) app.spinner.succeed(response)
+
+          for(let pendaftaran of detailList) {
+            // console.log(kunj)
+            app.spinner.start(`add pendaftaran: ${pendaftaran.noKartu}`)
+            let response = await app.addPendaftaran({
+              pendaftaran
+            })
+            if(response) app.spinner.succeed(JSON.stringify(response))
           }
   
         } else {
