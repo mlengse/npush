@@ -83,3 +83,32 @@ exports._getPendaftaranProvider = async({
 
 }
 
+exports._getPeserta = async({
+  that
+}) => {
+  try {
+    let blnThn = that.blnThnGetPst()
+    let kunjBlnIni = []
+    let tgl = that.tglBlnLalu()
+
+    while(!tgl.includes(blnThn)) {
+      let kunjHariIni = await that.getPendaftaranProvider(tgl)
+      kunjBlnIni = [...kunjBlnIni, ...kunjHariIni]
+      tgl = that.tglKmrn(tgl)
+    }
+
+    const kartuList = kunjBlnIni.map( ({
+      peserta: {
+        noKartu
+      }
+    }) => noKartu )
+
+    const uniqKartu = that.uniqEs6(kartuList)
+
+    return uniqKartu
+
+  }catch(e){
+    that.spinner.fail(e)
+  }
+}
+

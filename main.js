@@ -38,45 +38,50 @@ module.exports = async (isPM2) => {
         .trim();
         */
 
-// cek mulai dari sini ya...
 
       if(pembagi > 0 ) {
         const akanDiinput = Math.floor((kekurangan / pembagi) * 0.6);
         app.spinner.succeed(`akan diinput: ${akanDiinput}`)
 
-        const listAll = await getPeserta()
+
+        // cek mulai dari sini ya...
+
+        const listAll = await app.getPeserta()
         // const listAll = db()
 
         if(listAll && listAll.length) {
-          console.log(`jml pst di database: ${listAll.length}`);
+          app.spinner.succeed(`jml pst di database: ${listAll.length}`);
+        
           const listReady = listAll.filter( no  => uniqKartu.indexOf(no) == -1)
-          console.log(`jml pst blm diinput: ${listReady.length}`);
-          const randomList = getRandomSubarray(listReady, akanDiinput)
+          app.spinner.succeed(`jml pst blm diinput: ${listReady.length}`);
+
+          const randomList = app.getRandomSubarray(listReady, akanDiinput)
+          
           const detailList = randomList.map( no => ({
-              "kdProviderPeserta": process.env.PCAREUSR,
-              "tglDaftar": moment().add(-3, 'd').format('DD-MM-YYYY'),
-              "noKartu": no,
-              "kdPoli": '021',
-              "keluhan": null,
-              "kunjSakit": false,
-              "sistole": 0,
-              "diastole": 0,
-              "beratBadan": 0,
-              "tinggiBadan": 0,
-              "respRate": 0,
-              "heartRate": 0,
-              "rujukBalik": 0,
-              "kdTkp": '10'
+            "kdProviderPeserta": process.env.PCAREUSR,
+            "tglDaftar": moment().add(-3, 'd').format('DD-MM-YYYY'),
+            "noKartu": no,
+            "kdPoli": '021',
+            "keluhan": null,
+            "kunjSakit": false,
+            "sistole": 0,
+            "diastole": 0,
+            "beratBadan": 0,
+            "tinggiBadan": 0,
+            "respRate": 0,
+            "heartRate": 0,
+            "rujukBalik": 0,
+            "kdTkp": '10'
           }))
   
           for(let kunj of detailList) {
-              console.log(kunj.noKartu)
-              let response = await addPendaftaran(kunj)
-              if(response) console.log(response)
+              app.spinner.start(`add pendaftaran: ${kunj.noKartu}`)
+              let response = await app.addPendaftaran(kunj)
+              if(response) app.spinner.succeed(response)
           }
   
         } else {
-          console.error('excell error')
+          app.spinner.fail('excell error')
         }
 
       }
