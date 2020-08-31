@@ -45,7 +45,7 @@ module.exports = async (isPM2) => {
       if(pembagi > 0 || kekurangan > 0 ) {
         let akanDiinput = Math.floor((kekurangan / pembagi) * 0.6);
         if(pembagi < 1){
-          akanDiinput = kekurangan
+          akanDiinput = Math.floor(kekurangan)
         }
         app.spinner.succeed(`akan diinput: ${akanDiinput}`)
 
