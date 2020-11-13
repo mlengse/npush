@@ -4,56 +4,60 @@ const {
 const axios = require('axios')
 
 exports._sendKunj = async ({that, daft}) => {
-  // console.log(that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu))
-  let kunjungan = {
-    noKunjungan: null,
-    noKartu: daft.det.noKartu,
-    tglDaftar: daft.det.tglDaftar,
-    kdPoli: daft.det.kdPoli,
-    keluhan: daft.ket === 'skt' ? '-' : daft.ket,
-    kdSadar: "01",
-    sistole: that.getSystole(),
-    diastole: that.getDiastole(),
-    beratBadan: that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0].beratBadan,
-    tinggiBadan: that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0].tinggiBadan,
-    respRate: that.getRR(),
-    heartRate: that.getHR(),
-    terapi: "",
-    kdStatusPulang: "3",
-    tglPulang: daft.det.tglDaftar,
-    kdDokter: '123139',
-    kdDiag1: daft.ket === 'skt' ? 'Z00' : daft.ket === 'ht' ? 'I10' : 'E11',
-    kdDiag2: null,
-    kdDiag3: null,
-    kdPoliRujukInternal: null,
-    rujukLanjut: null,
-    kdTacc: 0,
-    alasanTacc: null
-  }
 
-  // console.log(kunjungan)
-
-  try {
-    that.spinner.start(`send kunjungan ${daft.det.tglDaftar}`)
-    const {
-      headers
-    } = await that.getArgs()
-  
-    const baseURL = `${that.config.APIV3}`
-  
-    const instance = axios.create({
-      baseURL,
-      headers
-    })
-
-    let res = await instance.post('/kunjungan', kunjungan)
-    if(res){
-      return res.data
+  let bbtb = that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0]
+  if(bbtb && bbtb.beratBadan){
+    let kunjungan = {
+      noKunjungan: null,
+      noKartu: daft.det.noKartu,
+      tglDaftar: daft.det.tglDaftar,
+      kdPoli: daft.det.kdPoli,
+      keluhan: daft.ket === 'skt' ? '-' : daft.ket,
+      kdSadar: "01",
+      sistole: that.getSystole(),
+      diastole: that.getDiastole(),
+      beratBadan: that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0].beratBadan,
+      tinggiBadan: that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0].tinggiBadan,
+      respRate: that.getRR(),
+      heartRate: that.getHR(),
+      terapi: "",
+      kdStatusPulang: "3",
+      tglPulang: daft.det.tglDaftar,
+      kdDokter: '123139',
+      kdDiag1: daft.ket === 'skt' ? 'Z00' : daft.ket === 'ht' ? 'I10' : 'E11',
+      kdDiag2: null,
+      kdDiag3: null,
+      kdPoliRujukInternal: null,
+      rujukLanjut: null,
+      kdTacc: 0,
+      alasanTacc: null
     }
-
-  }catch(e){
-    that.spinner.fail(JSON.stringify(e))
-    // return data
+  
+    // console.log(kunjungan)
+  
+    try {
+      that.spinner.start(`send kunjungan ${daft.det.tglDaftar}`)
+      const {
+        headers
+      } = await that.getArgs()
+    
+      const baseURL = `${that.config.APIV3}`
+    
+      const instance = axios.create({
+        baseURL,
+        headers
+      })
+  
+      let res = await instance.post('/kunjungan', kunjungan)
+      if(res){
+        return res.data
+      }
+  
+    }catch(e){
+      that.spinner.fail(JSON.stringify(e))
+      // return data
+    }
+  
   }
   
 }
@@ -228,7 +232,9 @@ exports._getPesertaInput = async({
           let pst = await that.getPesertaByNoka({
             noka
           })
-          if(pst.aktif) {
+
+          // console.log(pst)
+          if(pst.aktif && pst.kdProviderPst.nmProvider.trim() === 'Jayengan') {
             if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputRPPT){
               if(pst.pstProl && pst.pstProl !== ''){
                 if(pst.pstProl === 'HT'){
