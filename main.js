@@ -9,6 +9,8 @@ const app = new Core(config)
 module.exports = async (isPM2) => {
   try{
     await app.init()
+
+    //get kunj bln ini
     let tgl = app.tgl()
     while(tgl){
       let tglHariIni = `${tgl}-${app.blnThn()}`
@@ -23,24 +25,73 @@ module.exports = async (isPM2) => {
 
     const kartuList = app.kunjBlnIni.map( ({ peserta : { noKartu } }) => noKartu)
     const uniqKartu = app.uniqEs6(kartuList)
-    app.spinner.succeed(`jml kunj unik: ${uniqKartu.length} atau ${100 * uniqKartu.length/app.config.JML}%` )
+    app.spinner.succeed(`kunj total bln ${app.blnThn()}: ${app.kunjBlnIni.length}`)
+
+    app.kunjSakitBlnIni = app.kunjBlnIni.filter( kunj => kunj.kunjSakit)
+    app.spinner.succeed(`kunj sakit total bln ${app.blnThn()}: ${app.kunjSakitBlnIni.length}`)
+
+    //get rasio rujukan
+    let kunjSakitUnique = []
+    let rujukan = 0
+
+    for( let {peserta} of app.kunjSakitBlnIni ) {
+      //hitung jml rujukan
+      if(kunjSakitUnique.indexOf(peserta.noKartu) === -1){
+        let res = await app.getRiwayatKunjungan({ 
+          peserta
+        })
+        kunjSakitUnique.push(peserta.noKartu)
+
+        if(res && res.length) for(let re of res){
+          if(re.statusPulang && re.statusPulang.kdStatusPulang === '4'){
+            let blnThn = re.tglKunjungan.split('-')
+            blnThn.shift()
+            blnThn = blnThn.join('-')
+            if(blnThn === app.blnThn()) {
+              // console.log(re.tglKunjungan)
+              rujukan++
+            }
+          }
+        }
+      }
+
+    }
+
+    let inputRPPT = 0
+
+    if( 100*rujukan/app.kunjSakitBlnIni.length > 15 ){
+      //handle angka rujukan
+      let kunjSakit = app.kunjSakitBlnIni.length
+      app.spinner.succeed(`rujukan bln ${app.blnThn()}: ${rujukan} atau ${100*rujukan/app.kunjSakitBlnIni.length} %`)
+      while (100*rujukan/kunjSakit > 15){
+        kunjSakit++
+        inputRPPT++
+      }
+      app.spinner.succeed(`RPPT yg harus diinput: ${inputRPPT}`)
+    }
+
+    //--------------------
+
+    //hitung kekurangan kontak rate
+    let kekurangan = 0
 
     if (uniqKartu.length/app.config.JML < 0.15) {
-      const kekurangan = (app.config.JML*0.15) - uniqKartu.length
+
+      //handle angka kontak
+      app.spinner.succeed(`jml kunj unik: ${uniqKartu.length} atau ${100 * uniqKartu.length/app.config.JML}%` )
+      kekurangan = (app.config.JML*0.15) - uniqKartu.length
       app.spinner.succeed(`kekurangan contact rate: ${kekurangan}`);
+
+    }
+
+    if(inputRPPT || kekurangan ){
+
+      //get peserta yg akan diinput
       app.spinner.start(`tgl ${app.now} s.d. ${app.end}`)
       const sisaHari = Number(app.end) - Number(app.now)
       //const sisaHari = moment().to(moment().endOf("month"));
       app.spinner.succeed(`sisa hari: ${sisaHari}`);
       const pembagi = sisaHari - 2
-      /*
-      const pembagi = sisaHari
-        .replace("in", "")
-        .replace("days", "")
-        .trim();
-        */
-
-        // console.log(pembagi, kekurangan)
 
       if(pembagi > 0 || kekurangan > 0 ) {
         let akanDiinput = Math.floor((kekurangan / pembagi) * 0.6);
@@ -49,56 +100,63 @@ module.exports = async (isPM2) => {
         }
         app.spinner.succeed(`akan diinput: ${akanDiinput}`)
 
-
         // cek mulai dari sini ya...
 
-        const listAll = await app.getPeserta()
-        // const listAll = db()
+        // const listAll = await app.getPeserta()
+        await app.getPesertaInput({
+          akanDiinput,
+          uniqKartu,
+          inputRPPT
+        })
+      }
+    }
 
-        if(listAll && listAll.length) {
-          app.spinner.succeed(`jml pst di database: ${listAll.length}`);
-        
-          const listReady = listAll.filter( no  => uniqKartu.indexOf(no) == -1)
-          app.spinner.succeed(`jml pst blm diinput: ${listReady.length}`);
+    if(app.randomList && app.randomList.length) {
 
-          const randomList = app.getRandomSubarray(listReady, akanDiinput)
-
-          app.spinner.succeed(`random list ready: ${randomList.length}`)
-
-          
-          const detailList = randomList.map( no => ({
-            "kdProviderPeserta": app.config.PCAREUSR,
-            "tglDaftar": app.tglDaftar(),
-            "noKartu": no,
-            "kdPoli": '021',
-            "keluhan": null,
-            "kunjSakit": false,
-            "sistole": 0,
-            "diastole": 0,
-            "beratBadan": 0,
-            "tinggiBadan": 0,
-            "respRate": 0,
-            "heartRate": 0,
-            "rujukBalik": 0,
-            "kdTkp": '10'
-          }))
-
-          for(let pendaftaran of detailList) {
-            // console.log(kunj)
-            app.spinner.start(`add pendaftaran: ${pendaftaran.noKartu}`)
-            let response = await app.addPendaftaran({
-              pendaftaran
-            })
-            if(response) app.spinner.succeed(JSON.stringify(response))
-          }
-  
-        } else {
-          app.spinner.fail('excell error')
+      //inp kunj
+      let detailList = app.randomList.map( ({no, ket}) => ({
+        ket,
+        det: {
+          "kdProviderPeserta": app.config.PCAREUSR,
+          "tglDaftar": app.tglDaftar(),
+          "noKartu": no,
+          "kdPoli": ket === 'sht' ? '021' : '001',
+          "keluhan": null,
+          "kunjSakit": ket === 'sht' ? false : true,
+          "sistole": 0,
+          "diastole": 0,
+          "beratBadan": 0,
+          "tinggiBadan": 0,
+          "respRate": 0,
+          "heartRate": 0,
+          "rujukBalik": 0,
+          "kdTkp": ket === 'sht' ? '50' : '10'
         }
+      }))
 
+      for(let pendaftaran of detailList) {
+        // console.log(pendaftaran)
+
+        app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
+        let response = await app.addPendaftaran({
+          pendaftaran: pendaftaran.det
+        })
+        if(response) app.spinner.succeed(JSON.stringify(response))
+
+        if(pendaftaran.det.kunjSakit) {
+          //add kunj
+          let kunjResponse = await app.sendKunj({ daft: pendaftaran })
+          if(kunjResponse) app.spinner.succeed(JSON.stringify(kunjResponse))
+
+          if(pendaftaran.ket === 'dm'){
+            // add mcu
+          }
+
+        }
       }
 
     }
+
 
     await app.close(isPM2)
 

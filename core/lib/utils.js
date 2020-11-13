@@ -12,3 +12,25 @@ exports.getRandomSubarray = (arr, size) => {
   }
   return shuffled.slice(0, size);
 };
+
+exports.getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}
+
+exports.getSystole = () => {
+  return this.getRandomInt( 110, 129)
+}
+
+exports.getDiastole = () => {
+  return this.getRandomInt( 70, 79)
+}
+
+exports.getRR = () => {
+  return this.getRandomInt( 18, 24)
+}
+
+exports.getHR = () => {
+  return this.getRandomInt( 90, 98)
+}
