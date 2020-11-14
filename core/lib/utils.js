@@ -27,6 +27,10 @@ exports.getDiastole = () => {
   return this.getRandomInt( 70, 79)
 }
 
+exports.getGDP = () => {
+  return this.getRandomInt( 80, 130)
+}
+
 exports.getRR = () => {
   return this.getRandomInt( 18, 24)
 }

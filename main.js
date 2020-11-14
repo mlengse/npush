@@ -146,10 +146,17 @@ module.exports = async (isPM2) => {
         if(pendaftaran.det.kunjSakit) {
           //add kunj
           let kunjResponse = await app.sendKunj({ daft: pendaftaran })
-          if(kunjResponse) app.spinner.succeed(JSON.stringify(kunjResponse))
-
-          if(pendaftaran.ket === 'dm'){
-            // add mcu
+          if(kunjResponse) {
+            app.spinner.succeed(JSON.stringify(kunjResponse))
+            if(kunjResponse && kunjResponse.response && kunjResponse.response.message && pendaftaran.ket === 'dm'){
+              // add mcu
+              let response = await app.sendMCU({
+                daft: pendaftaran,
+                noKunjungan:kunjResponse.response.message 
+              })
+              if(response) app.spinner.succeed(JSON.stringify(response))
+      
+            }
           }
 
         }

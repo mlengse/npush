@@ -3,11 +3,73 @@ const {
 } = require('node-rest-client')
 const axios = require('axios')
 
+exports._sendMCU = async ({ that, noKunjungan, daft }) => {
+  let mcu = {
+    kdMCU: 0,
+    noKunjungan: noKunjungan,
+    kdProvider: that.config.KDPROVIDER,
+    tglPelayanan: daft.det.tglDaftar,
+    tekananDarahSistole: that.kunjunganNow.sistole,
+    tekananDarahDiastole: that.kunjunganNow.diastole,
+    radiologiFoto: null,
+    darahRutinHemo: 0,
+    darahRutinLeu: 0,
+    darahRutinErit: 0,
+    darahRutinLaju: 0,
+    darahRutinHema: 0,
+    darahRutinTrom: 0,
+    lemakDarahHDL: 0,
+    lemakDarahLDL: 0,
+    lemakDarahChol: 0,
+    lemakDarahTrigli: 0,
+    gulaDarahSewaktu: 0,
+    gulaDarahPuasa: that.getGDP(),
+    gulaDarahPostPrandial: 0,
+    gulaDarahHbA1c: 0,
+    fungsiHatiSGOT: 0,
+    fungsiHatiSGPT: 0,
+    fungsiHatiGamma: 0,
+    fungsiHatiProtKual: 0,
+    fungsiHatiAlbumin: 0,
+    fungsiGinjalCrea: 0,
+    fungsiGinjalUreum: 0,
+    fungsiGinjalAsam: 0,
+    fungsiJantungABI: 0,
+    fungsiJantungEKG: null,
+    fungsiJantungEcho: null,
+    funduskopi: null,
+    pemeriksaanLain: null,
+    keterangan: null
+  }
+  try {
+    that.spinner.start(`send MCU ${noKunjungan}`)
+    const {
+      headers
+    } = await that.getArgs()
+  
+    const baseURL = `${that.config.APIV3}`
+  
+    const instance = axios.create({
+      baseURL,
+      headers
+    })
+
+    let res = await instance.post('/mcu', mcu)
+    if(res){
+      return res.data
+    }
+
+  }catch(e){
+    that.spinner.fail(JSON.stringify(e))
+    // return data
+  }
+}
+
 exports._sendKunj = async ({that, daft}) => {
 
   let bbtb = that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0]
   if(bbtb && bbtb.beratBadan){
-    let kunjungan = {
+    that.kunjunganNow = {
       noKunjungan: null,
       noKartu: daft.det.noKartu,
       tglDaftar: daft.det.tglDaftar,
@@ -23,7 +85,7 @@ exports._sendKunj = async ({that, daft}) => {
       terapi: "",
       kdStatusPulang: "3",
       tglPulang: daft.det.tglDaftar,
-      kdDokter: '123139',
+      kdDokter: that.config.KDDOKTER,
       kdDiag1: daft.ket === 'skt' ? 'Z00' : daft.ket === 'ht' ? 'I10' : 'E11',
       kdDiag2: null,
       kdDiag3: null,
@@ -36,7 +98,7 @@ exports._sendKunj = async ({that, daft}) => {
     // console.log(kunjungan)
   
     try {
-      that.spinner.start(`send kunjungan ${daft.det.tglDaftar}`)
+      that.spinner.start(`send kunjungan ${daft.det.noKartu} ${daft.det.tglDaftar}`)
       const {
         headers
       } = await that.getArgs()
@@ -48,7 +110,7 @@ exports._sendKunj = async ({that, daft}) => {
         headers
       })
   
-      let res = await instance.post('/kunjungan', kunjungan)
+      let res = await instance.post('/kunjungan', that.kunjunganNow)
       if(res){
         return res.data
       }
@@ -234,7 +296,7 @@ exports._getPesertaInput = async({
           })
 
           // console.log(pst)
-          if(pst.aktif && pst.kdProviderPst.nmProvider.trim() === 'Jayengan') {
+          if(pst.aktif && pst.kdProviderPst.nmProvider.trim() === that.config.NMPROVIDER) {
             if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputRPPT){
               if(pst.pstProl && pst.pstProl !== ''){
                 if(pst.pstProl === 'HT'){
@@ -258,9 +320,9 @@ exports._getPesertaInput = async({
 
     }
   
-    // while((randomListHT.length + randomListDM.length + randomListSkt.length) < inputRPPT){
-    //   await baleni()
-    // }
+    while((randomListHT.length + randomListDM.length + randomListSkt.length) < inputRPPT){
+      await baleni()
+    }
     while((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
       await baleni()
     }
