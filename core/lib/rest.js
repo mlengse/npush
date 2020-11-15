@@ -297,19 +297,19 @@ exports._getPesertaInput = async({
 
           // console.log(pst)
           if(pst.aktif && pst.kdProviderPst.nmProvider.trim() === that.config.NMPROVIDER) {
-            if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputRPPT){
-              if(pst.pstProl && pst.pstProl !== ''){
-                if(pst.pstProl === 'HT'){
-                  randomListHT.push(pst.noKartu)
-                }
-                if(pst.pstProl === 'DM'){
-                  randomListDM.push(pst.noKartu)
-                }
-              } else {
-                randomListSkt.push(pst.noKartu)
+            if(pst.pstProl && pst.pstProl !== ''){
+              if(pst.pstProl === 'HT'){
+                randomListHT.push(pst.noKartu)
               }
-            } else if((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
-              randomListSht.push(pst.noKartu)
+              if(pst.pstProl === 'DM'){
+                randomListDM.push(pst.noKartu)
+              }
+            } else {
+              if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputRPPT){
+                randomListSkt.push(pst.noKartu)
+              } else if((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
+                randomListSht.push(pst.noKartu)
+              }
             }
 
           }
