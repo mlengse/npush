@@ -23,7 +23,7 @@ exports._sendMCU = async ({ that, noKunjungan, daft }) => {
     lemakDarahChol: 0,
     lemakDarahTrigli: 0,
     gulaDarahSewaktu: 0,
-    gulaDarahPuasa: that.getGDP(),
+    gulaDarahPuasa: daft.ket === 'dm' ? that.getGDP() : 0,
     gulaDarahPostPrandial: 0,
     gulaDarahHbA1c: 0,
     fungsiHatiSGOT: 0,
