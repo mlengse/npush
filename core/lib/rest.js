@@ -238,9 +238,9 @@ exports._getPesertaInput = async({
     let randomListHT = []
     let randomListSkt = []
 
-    let cekPstSudah =[]
+    // let cekPstSudah =[]
 
-    that.dataBBTB = []
+    // that.dataBBTB = []
 
     let baleni = async () => {
       let kunjHariIni = await that.getPendaftaranProvider({
@@ -258,8 +258,8 @@ exports._getPesertaInput = async({
         tinggiBadan
       }) )
   
-      for ({noka, beratBadan, tinggiBadan} of kartuList) if(cekPstSudah.indexOf(noka) === -1 && uniqKartu.indexOf(noka) === -1) {
-        cekPstSudah.push(noka)
+      for ({noka, beratBadan, tinggiBadan} of kartuList) if(that.cekPstSudah.indexOf(noka) === -1 && uniqKartu.indexOf(noka) === -1) {
+        that.cekPstSudah.push(noka)
         if(tinggiBadan === 0 || beratBadan === 0){
           let riws = await that.getRiwayatKunjungan({
             peserta: {
@@ -401,6 +401,28 @@ exports._getRiwayatKunjungan = async ({that, peserta}) => {
     let res = await instance.get(`/kunjungan/peserta/${peserta.noKartu}`)
 
     if(res && res.data && res.data.response && res.data.response.list.length){
+      let riws = res.data.response.list
+      // let tinggiBadan = 0
+      // let beratBadan = 0
+      if(riws && riws.length) for(let riw of riws){
+        if(riw.beratBadan && riw.tinggiBadan){
+          // tinggiBadan = riw.tinggiBadan
+          // beratBadan = riw.beratBadan
+          // console.log(riw)
+          if(riw.tinggiBadan && riw.beratBadan){
+            that.dataBBTB.push({
+              noKartu: riw.peserta.noKartu,
+              tinggiBadan: riw.tinggiBadan,
+              beratBadan: riw.beratBadan
+            })
+            that.cekPstSudah.push(riw.peserta.noKartu)
+          }
+
+          break
+        }
+      }
+
+
       return res.data.response.list
     }
     return []

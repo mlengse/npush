@@ -10,6 +10,10 @@ module.exports = async (isPM2) => {
   try{
     await app.init()
 
+    app.dataBBTB = []
+    app.cekPstSudah =[]
+
+
     //get kunj bln ini
     let tgl = app.tgl()
     while(tgl){
