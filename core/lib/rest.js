@@ -7,7 +7,7 @@ exports._sendMCU = async ({ that, noKunjungan, daft }) => {
   let mcu = {
     kdMCU: 0,
     noKunjungan: noKunjungan,
-    kdProvider: that.config.KDPROVIDER,
+    kdProvider: that.config.PCAREUSR,
     tglPelayanan: daft.det.tglDaftar,
     tekananDarahSistole: that.kunjunganNow.sistole,
     tekananDarahDiastole: that.kunjunganNow.diastole,
@@ -295,8 +295,8 @@ exports._getPesertaInput = async({
             noka
           })
 
-          // console.log(pst)
-          if(pst.aktif && pst.kdProviderPst.nmProvider.trim() === that.config.NMPROVIDER) {
+          console.log(pst)
+          if(pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PCAREUSR) {
             if(pst.pstProl && pst.pstProl !== ''){
               if(pst.pstProl === 'HT'){
                 randomListHT.push(pst.noKartu)

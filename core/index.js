@@ -31,12 +31,14 @@ module.exports = class Core {
     this.spinner.start('init apps')
 
     let settings = await this.getSettings()
+    let dokter = await this.getDokters()
 
     this.config = Object.assign({}, this.config, {
       CONSPWD: settings[0].cons_pass,
       XCONSID: settings[0].cons_user,
       PCAREUSR: settings[0].pcare_user,
       PCAREPWD: settings[0].pcare_pass,
+      KDDOKTER: this.config.KDDOKTER || dokter[0].kdDokter
     })
 
     // this.getTgl()
