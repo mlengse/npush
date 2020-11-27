@@ -295,7 +295,7 @@ exports._getPesertaInput = async({
             noka
           })
 
-          console.log(pst)
+          // console.log(pst)
           if(pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PCAREUSR) {
             if(pst.pstProl && pst.pstProl !== ''){
               if(pst.pstProl === 'HT'){
