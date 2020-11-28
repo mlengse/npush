@@ -97,8 +97,8 @@ module.exports = async (isPM2) => {
       app.spinner.succeed(`sisa hari: ${sisaHari}`);
       const pembagi = sisaHari - 2
 
-      if(pembagi > 0 || kekurangan > 0 ) {
-        let akanDiinput = Math.floor((kekurangan / pembagi) * 0.6);
+      if(pembagi > 0 || kekurangan > 0 || inputRPPT) {
+        let akanDiinput = Math.floor((kekurangan / pembagi) * 0.6) || inputRPPT;
         if(pembagi < 1){
           akanDiinput = Math.floor(kekurangan)
         }
