@@ -389,7 +389,7 @@ exports._getPeserta = async({
 exports._getRiwayatKunjungan = async ({that, peserta}) => {
   try{
     const { headers } = await that.getArgs()
-    that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu }`)
+    // that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu }`)
 
     const baseURL = `${that.config.APIV3}`
   
