@@ -6,13 +6,32 @@ const config = require('./config')
 
 const app = new Core(config)
 
+if (!('toJSON' in Error.prototype))
+Object.defineProperty(Error.prototype, 'toJSON', {
+    value: function () {
+        var alt = {};
+
+        Object.getOwnPropertyNames(this).forEach(function (key) {
+            alt[key] = this[key];
+        }, this);
+
+        return alt;
+    },
+    configurable: true,
+    writable: true
+});
+
 module.exports = async (isPM2) => {
+
   try{
     await app.init()
 
     app.dataBBTB = []
     app.cekPstSudah =[]
 
+    let kunjIni = (await app.getPendaftaranProvider({
+      tanggal: app.tglDaftar()
+    })).map(({ peserta: { noKartu }}) => noKartu)
 
     //get kunj bln ini
     let tgl = app.tgl()
@@ -109,7 +128,7 @@ module.exports = async (isPM2) => {
         // const listAll = await app.getPeserta()
         await app.getPesertaInput({
           akanDiinput,
-          uniqKartu,
+          uniqKartu: [...uniqKartu, ...kunjIni],
           inputRPPT
         })
       }
@@ -138,8 +157,9 @@ module.exports = async (isPM2) => {
         }
       }))
 
+
       for(let pendaftaran of detailList) {
-        // console.log(pendaftaran)
+        app.spinner.succeed(`${kunjIni.indexOf(pendaftaran.det.noKartu)}, ${pendaftaran.det.noKartu}`)
 
         app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
         let response = await app.addPendaftaran({
