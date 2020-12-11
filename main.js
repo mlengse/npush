@@ -6,21 +6,6 @@ const config = require('./config')
 
 const app = new Core(config)
 
-if (!('toJSON' in Error.prototype))
-Object.defineProperty(Error.prototype, 'toJSON', {
-    value: function () {
-        var alt = {};
-
-        Object.getOwnPropertyNames(this).forEach(function (key) {
-            alt[key] = this[key];
-        }, this);
-
-        return alt;
-    },
-    configurable: true,
-    writable: true
-});
-
 module.exports = async (isPM2) => {
 
   try{
@@ -56,8 +41,11 @@ module.exports = async (isPM2) => {
     //get rasio rujukan
     let kunjSakitUnique = []
     let rujukan = 0
+    let htAll = []
 
     for( let {peserta} of app.kunjSakitBlnIni ) {
+      let isHT = false
+      let kunjHT = []
       //hitung jml rujukan
       if(kunjSakitUnique.indexOf(peserta.noKartu) === -1){
         let res = await app.getRiwayatKunjungan({ 
@@ -66,6 +54,20 @@ module.exports = async (isPM2) => {
         kunjSakitUnique.push(peserta.noKartu)
 
         if(res && res.length) for(let re of res){
+//--------------------------------------------------
+          // if(re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10'){
+          //   let blnThn = re.tglKunjungan.split('-')
+          //   blnThn.shift()
+          //   blnThn = blnThn.join('-')
+          //   if(blnThn === app.blnThn()) {
+          //     // console.log(re)
+          //     isHT = {
+          //       peserta
+          //     }
+          //     kunjHT.push(re)
+          //   }
+          // }
+//---------------------------------------------
           if(re.statusPulang && re.statusPulang.kdStatusPulang === '4'){
             let blnThn = re.tglKunjungan.split('-')
             blnThn.shift()
@@ -77,9 +79,18 @@ module.exports = async (isPM2) => {
           }
         }
       }
-
+//-------------------------------------------
+      // if(isHT) {
+      //   htAll.push(Object.assign({}, isHT, {
+      //     kunjHT
+      //   }))
+      // }
+//-----------------------------------------------
     }
-
+//-----------------------------------
+    // console.log(htAll.length)
+    // console.log(htAll[htAll.length-1])
+//----------------------------------------
     let inputRPPT = 0
 
     if( 100*rujukan/app.kunjSakitBlnIni.length > 15 ){
@@ -174,12 +185,16 @@ module.exports = async (isPM2) => {
             app.spinner.succeed(JSON.stringify(kunjResponse))
             if(kunjResponse && kunjResponse.response && kunjResponse.response.message && (pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht')){
               // add mcu
-              let response = await app.sendMCU({
-                daft: pendaftaran,
-                noKunjungan:kunjResponse.response.message 
-              })
-              if(response) app.spinner.succeed(JSON.stringify(response))
+
+        //-------------------------------------------------------------------------
+
+              // let response = await app.sendMCU({
+              //   daft: pendaftaran,
+              //   noKunjungan:kunjResponse.response.message 
+              // })
+              // if(response) app.spinner.succeed(JSON.stringify(response))
       
+        //-------------------------------------------------------------------------
             }
           }
 
