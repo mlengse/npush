@@ -65,6 +65,8 @@ exports._sendMCU = async ({ that, noKunjungan, daft }) => {
   }
 }
 
+// exports._getMCU = 
+
 exports._sendKunj = async ({that, daft}) => {
 
   let bbtb = that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0]

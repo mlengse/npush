@@ -54,26 +54,21 @@ module.exports = async (isPM2) => {
         kunjSakitUnique.push(peserta.noKartu)
 
         if(res && res.length) for(let re of res){
+          let blnThn = re.tglKunjungan.split('-')
+          blnThn.shift()
+          blnThn = blnThn.join('-')
+          if(blnThn === app.blnThn()) {
+
 //--------------------------------------------------
-          // if(re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10'){
-          //   let blnThn = re.tglKunjungan.split('-')
-          //   blnThn.shift()
-          //   blnThn = blnThn.join('-')
-          //   if(blnThn === app.blnThn()) {
-          //     // console.log(re)
-          //     isHT = {
-          //       peserta
-          //     }
-          //     kunjHT.push(re)
-          //   }
-          // }
+            // if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10') ){
+            //   // console.log(re)
+            //   isHT = {
+            //     peserta,
+            //   }
+            //   kunjHT.push(JSON.stringify(re))
+            // }
 //---------------------------------------------
-          if(re.statusPulang && re.statusPulang.kdStatusPulang === '4'){
-            let blnThn = re.tglKunjungan.split('-')
-            blnThn.shift()
-            blnThn = blnThn.join('-')
-            if(blnThn === app.blnThn()) {
-              // console.log(re.tglKunjungan)
+            if(re.statusPulang && re.statusPulang.kdStatusPulang === '4'){
               rujukan++
             }
           }
@@ -81,9 +76,11 @@ module.exports = async (isPM2) => {
       }
 //-------------------------------------------
       // if(isHT) {
-      //   htAll.push(Object.assign({}, isHT, {
+      //   let pushObj = Object.assign({}, isHT, {
       //     kunjHT
-      //   }))
+      //   })
+      //   // console.log(pushObj)
+      //   htAll.push(pushObj)
       // }
 //-----------------------------------------------
     }
