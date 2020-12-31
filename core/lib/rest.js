@@ -3,6 +3,41 @@ const {
 } = require('node-rest-client')
 const axios = require('axios')
 
+exports._deletePendaftaran = async ({ 
+  that,
+  noKartu,
+  tgldaftar,
+  noUrut,
+  kdPoli
+}) => {
+  try {
+    let strP = `/pendaftaran/peserta/${noKartu}/tglDaftar/${tgldaftar}/noUrut/${noUrut}/kdPoli/${kdPoli}`
+    that.spinner.start(`delete pendaftaran ${strP}`)
+    const {
+      headers
+    } = await that.getArgs()
+  
+    const baseURL = `${that.config.APIV3}`
+  
+    const instance = axios.create({
+      baseURL,
+      headers
+    })
+
+
+
+    let res = await instance.delete(strP)
+    if(res){
+      return res.data
+    }
+
+  }catch(e){
+    that.spinner.fail(JSON.stringify(e))
+    // return data
+  }
+}
+
+
 exports._sendMCU = async ({ that, noKunjungan, daft }) => {
   let mcu = {
     kdMCU: 0,
