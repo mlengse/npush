@@ -180,8 +180,9 @@ exports._getPendaftaranProvider = async({
 
       // that.spinner.start(`url: ${apiURL}`)
   
-      let { 
-        response 
+      let {
+        response,
+        metadata
       } = await new Promise((resolve, reject) =>  {
         let req = client.get(apiURL, args, data => resolve(data) )
         req.on('requestTimeout', function (req) {
@@ -198,6 +199,8 @@ exports._getPendaftaranProvider = async({
           reject('request error', err);
         });
       });
+      // console.log(metadata)
+      // let response = a.response
       if (response) {
         // console.log(response)
         if (response.count) {
