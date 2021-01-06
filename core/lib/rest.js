@@ -11,25 +11,19 @@ exports._deletePendaftaran = async ({
   kdPoli
 }) => {
   try {
-    let strP = `/pendaftaran/peserta/${noKartu}/tglDaftar/${tgldaftar}/noUrut/${noUrut}/kdPoli/${kdPoli}`
-    that.spinner.start(`delete pendaftaran ${strP}`)
     const {
       headers
     } = await that.getArgs()
   
     const baseURL = `${that.config.APIV3}`
   
-    const instance = axios.create({
+    that.spinner.start(`delete pendaftaran ${noKartu} tgl ${tgldaftar} noUrut ${noUrut} kdPoli ${kdPoli}`)
+    let data = (await axios.create({
       baseURL,
       headers
-    })
-
-
-
-    let res = await instance.delete(strP)
-    if(res){
-      return res.data
-    }
+    }).delete(`/pendaftaran/peserta/${noKartu}/tglDaftar/${tgldaftar}/noUrut/${noUrut}/kdPoli/${kdPoli}`)).data
+  
+    return data
 
   }catch(e){
     that.spinner.fail(JSON.stringify(e))
@@ -100,7 +94,35 @@ exports._sendMCU = async ({ that, noKunjungan, daft }) => {
   }
 }
 
-// exports._getMCU = 
+exports._getMCU = async({
+  that,
+  noKunjungan
+}) => {
+  try{
+    const { headers } = await that.getArgs()
+
+    that.spinner.start(`get MCU by no kunj: ${noKunjungan}`)
+
+    const baseURL = `${that.config.APIV3}`
+  
+    const instance = axios.create({
+      baseURL,
+      headers
+    })
+
+    let res = await instance.get(`/mcu/kunjungan/${noKunjungan}`)
+    if(res && res.data && res.data.response ){
+      return res.data.response
+    }
+
+  }catch({
+    response
+  }){
+    return response
+  }
+
+}
+
 
 exports._sendKunj = async ({that, daft}) => {
 
@@ -266,7 +288,9 @@ exports._getPesertaInput = async({
   that,
   akanDiinput,
   uniqKartu,
-  inputRPPT
+  inputSakit,
+  inputHT,
+  inputDM
 }) => {
 
   try {
@@ -286,6 +310,7 @@ exports._getPesertaInput = async({
       let kunjHariIni = await that.getPendaftaranProvider({
         tanggal
       })
+      // console.log(kunjHariIni)
       let kartuList = kunjHariIni.map( ({
         peserta: {
           noKartu,
@@ -298,69 +323,77 @@ exports._getPesertaInput = async({
         tinggiBadan
       }) )
   
-      for ({noka, beratBadan, tinggiBadan} of kartuList) if(that.cekPstSudah.indexOf(noka) === -1 && uniqKartu.indexOf(noka) === -1) {
-        that.cekPstSudah.push(noka)
-        if(tinggiBadan === 0 || beratBadan === 0){
-          let riws = await that.getRiwayatKunjungan({
-            peserta: {
-              noKartu: noka
-            }
-          })
-
-          if(riws && riws.length) for(let riw of riws){
-            if(riw.beratBadan && riw.tinggiBadan){
-              tinggiBadan = riw.tinggiBadan
-              beratBadan = riw.beratBadan
-              break
-            }
-          }
-
-          // console.log(riws)
-        }
-        if(tinggiBadan && beratBadan){
-          that.dataBBTB.push({
-            noKartu: noka,
-            tinggiBadan,
-            beratBadan
-          })
+      for (kart of kartuList) {
+        // console.log(kart)
+        let {
+          noka, 
+          beratBadan, 
+          tinggiBadan
+        } = kart
+        if(that.cekPstSudah.indexOf(noka) === -1 && uniqKartu.indexOf(noka) === -1) {
+          that.cekPstSudah.push(noka)
+          if(tinggiBadan === 0 || beratBadan === 0){
+            let riws = await that.getRiwayatKunjungan({
+              peserta: {
+                noKartu: noka
+              }
+            })
   
-        }
-        if(
-          randomListSkt.indexOf(noka) === -1 ||
-          randomListHT.indexOf(noka) === -1 ||
-          randomListDM.indexOf(noka) === -1 ||
-          randomListSht.indexOf(noka) === -1
-        ) {
-          let pst = await that.getPesertaByNoka({
-            noka
-          })
-
-          // console.log(pst)
-          if(pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PCAREUSR) {
-            if(pst.pstProl && pst.pstProl !== ''){
-              if(pst.pstProl === 'HT'){
-                randomListHT.push(pst.noKartu)
-              }
-              if(pst.pstProl === 'DM'){
-                randomListDM.push(pst.noKartu)
-              }
-            } else {
-              if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputRPPT){
-                randomListSkt.push(pst.noKartu)
-              } else if((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
-                randomListSht.push(pst.noKartu)
+            if(riws && riws.length) for(let riw of riws){
+              if(riw.beratBadan && riw.tinggiBadan){
+                tinggiBadan = riw.tinggiBadan
+                beratBadan = riw.beratBadan
+                break
               }
             }
-
+  
+            // console.log(riws)
           }
-
+          if(tinggiBadan && beratBadan){
+            that.dataBBTB.push({
+              noKartu: noka,
+              tinggiBadan,
+              beratBadan
+            })
+    
+          }
+          if(
+            randomListSkt.indexOf(noka) === -1 ||
+            randomListHT.indexOf(noka) === -1 ||
+            randomListDM.indexOf(noka) === -1 ||
+            randomListSht.indexOf(noka) === -1
+          ) {
+            let pst = await that.getPesertaByNoka({
+              noka
+            })
+  
+            // console.log(pst)
+            if(pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PCAREUSR) {
+              if(pst.pstProl && pst.pstProl !== ''){
+                if(pst.pstProl.includes('HT') && randomListHT.length < inputHT){
+                  randomListHT.push(pst.noKartu)
+                }
+                if(pst.pstProl.includes('DM') && randomListDM.length < inputDM){
+                  randomListDM.push(pst.noKartu)
+                }
+              } else {
+                if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit){
+                  randomListSkt.push(pst.noKartu)
+                } else if((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
+                  randomListSht.push(pst.noKartu)
+                }
+              }
+  
+            }
+  
+          }
         }
       }
       tanggal = that.tglKmrn(tanggal)
 
     }
   
-    while((randomListHT.length + randomListDM.length + randomListSkt.length) < inputRPPT){
+    while((randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit){
       await baleni()
     }
     while((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
@@ -488,17 +521,14 @@ exports._getPesertaByNoka = async ({ that, noka}) => {
     })
 
     let res = await instance.get(`/peserta/noka/${noka}`)
-
     if(res && res.data && res.data.response ){
       return res.data.response
     }
 
   }catch({
-    response: {
-      data
-    }
+    response
   }){
-    return data
+    return response
   }
 
 }
