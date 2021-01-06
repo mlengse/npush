@@ -253,7 +253,7 @@ exports._getPendaftaranProvider = async({
         
         //it's usefull to handle request errors to avoid, for example, socket hang up errors on request timeouts
         req.on('error', function (err) {
-          reject('request error', err);
+          reject(err);
         });
       });
       // console.log(metadata)
