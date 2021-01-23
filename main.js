@@ -81,7 +81,8 @@ module.exports = async (isPM2) => {
               let mcu = await app.getMCU({
                 noKunjungan: re.noKunjungan
               })
-              if(mcu && mcu.list.length ) for( let mc of mcu.list) {
+              // console.log(mcu)
+              if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
                 if(mc.gulaDarahPuasa < 130 ) {
                   let peserta =  await app.getPesertaByNoka({
                     noka: re.peserta.noKartu
@@ -119,6 +120,9 @@ module.exports = async (isPM2) => {
 
     let inputHT = 0
     app.spinner.succeed(`HT Prolanis terkendali: ${kunjHT.length} dari kunj HT: ${htAll} atau: ${Math.floor(100*kunjHT.length/htAll)} %`)
+    if(htAll < 2000) {
+      htAll = 2000
+    }
     if(100*kunjHT.length/htAll < 5){
       let htNum = kunjHT.length
       while (100*htNum/htAll < 5 ){
@@ -130,6 +134,9 @@ module.exports = async (isPM2) => {
 
     let inputDM = 0
     app.spinner.succeed(`DM Prolanis terkendali: ${kunjDM.length} dari kunj DM: ${dmAll} atau: ${Math.floor(100*kunjDM.length/dmAll)} %`)
+    if(dmAll < 500) {
+      dmAll = 500
+    }
     if(100*kunjDM.length/dmAll < 5){
       let dmNum = kunjDM.length
       while (100*dmNum/dmAll < 5 ){
@@ -210,9 +217,11 @@ module.exports = async (isPM2) => {
         }
       }))
 
-
+      let noT = 0
       for(let pendaftaran of detailList) {
-        app.spinner.succeed(`${kunjIni.indexOf(pendaftaran.det.noKartu)}, ${pendaftaran.det.noKartu}`)
+        noT++
+        app.spinner.succeed(`${noT}: ${pendaftaran.det.noKartu}`)
+        // app.spinner.succeed(`${kunjIni.indexOf(pendaftaran.det.noKartu)}, ${pendaftaran.det.noKartu}`)
 
         app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
         let response = await app.addPendaftaran({
