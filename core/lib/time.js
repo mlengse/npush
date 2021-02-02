@@ -1,5 +1,6 @@
 const moment = require('moment')
-exports.xTimestamp = () => moment.utc().format('X')
+const momentTS = require('moment')
+exports.xTimestamp = () => momentTS.utc().format('X')
 moment.now = () => +new Date('2021', '0', '30');
 exports.tgl = () => moment().add(-1, 'd').date()
 exports.blnThn = () => moment().add(-1, 'd').format('MM-YYYY')
