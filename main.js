@@ -45,117 +45,117 @@ module.exports = async (isPM2) => {
     let dmAll = 0
     let kunjDM = []
 
-    for( let {peserta} of app.kunjSakitBlnIni ) {
-      let isHT = false
-      let isHTControlled = false
-      let isDM = false
-      let isDMControlled = false
-      //hitung jml rujukan
-      if(kunjSakitUnique.indexOf(peserta.noKartu) === -1){
-        let res = await app.getRiwayatKunjungan({ 
-          peserta
-        })
-        kunjSakitUnique.push(peserta.noKartu)
+    // for( let {peserta} of app.kunjSakitBlnIni ) {
+    //   let isHT = false
+    //   let isHTControlled = false
+    //   let isDM = false
+    //   let isDMControlled = false
+    //   //hitung jml rujukan
+    //   if(kunjSakitUnique.indexOf(peserta.noKartu) === -1){
+    //     let res = await app.getRiwayatKunjungan({ 
+    //       peserta
+    //     })
+    //     kunjSakitUnique.push(peserta.noKartu)
 
-        if(res && res.length) for(let re of res){
-          let blnThn = re.tglKunjungan.split('-')
-          blnThn.shift()
-          blnThn = blnThn.join('-')
-          if(blnThn === app.blnThn()) {
-            if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10' || re.sistole > 129 || re.diastole > 89) ){
-              isHT = true
-              if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
-                let peserta =  await app.getPesertaByNoka({
-                  noka: re.peserta.noKartu
-                })
-                if(peserta.pstProl.includes('HT')){
-                  isHTControlled = true
-                }
-              }
-            }
+    //     if(res && res.length) for(let re of res){
+    //       let blnThn = re.tglKunjungan.split('-')
+    //       blnThn.shift()
+    //       blnThn = blnThn.join('-')
+    //       if(blnThn === app.blnThn()) {
+    //         if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10' || re.sistole > 129 || re.diastole > 89) ){
+    //           isHT = true
+    //           if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
+    //             let peserta =  await app.getPesertaByNoka({
+    //               noka: re.peserta.noKartu
+    //             })
+    //             if(peserta.pstProl.includes('HT')){
+    //               isHTControlled = true
+    //             }
+    //           }
+    //         }
 
-            if((re.diagnosa1.kdDiag === 'E11.9' || re.diagnosa2.kdDiag === 'E11.9' || re.diagnosa3.kdDiag === 'E11.9'
-            || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11'
-            ) ){
-              isDM = true
-              let mcu = await app.getMCU({
-                noKunjungan: re.noKunjungan
-              })
-              // console.log(mcu)
-              if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
-                if(mc.gulaDarahPuasa < 130 ) {
-                  let peserta =  await app.getPesertaByNoka({
-                    noka: re.peserta.noKartu
-                  })
-                  if(peserta.pstProl.includes('DM')){
-                    isDMControlled = true
-                  }
-                }
-              }
-            }
+    //         if((re.diagnosa1.kdDiag === 'E11.9' || re.diagnosa2.kdDiag === 'E11.9' || re.diagnosa3.kdDiag === 'E11.9'
+    //         || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11'
+    //         ) ){
+    //           isDM = true
+    //           let mcu = await app.getMCU({
+    //             noKunjungan: re.noKunjungan
+    //           })
+    //           // console.log(mcu)
+    //           if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
+    //             if(mc.gulaDarahPuasa < 130 ) {
+    //               let peserta =  await app.getPesertaByNoka({
+    //                 noka: re.peserta.noKartu
+    //               })
+    //               if(peserta.pstProl.includes('DM')){
+    //                 isDMControlled = true
+    //               }
+    //             }
+    //           }
+    //         }
 
-            if(re.statusPulang && re.statusPulang.kdStatusPulang === '4'){
-              rujukan++
-            }
-          }
-        }
-      }
-      if(isHTControlled) {
-        if(kunjHT.indexOf(peserta.noKartu) === -1){
-          kunjHT.push(peserta.noKartu)
-        }
-      }
-      if(isHT) {
-        htAll++
-      }
-      if(isDMControlled) {
-        if(kunjDM.indexOf(peserta.noKartu) === -1){
-          kunjDM.push(peserta.noKartu)
-        }
-      }
-      if(isDM) {
-        dmAll++
-      }
-    }
+    //         if(re.statusPulang && re.statusPulang.kdStatusPulang === '4'){
+    //           rujukan++
+    //         }
+    //       }
+    //     }
+    //   }
+    //   if(isHTControlled) {
+    //     if(kunjHT.indexOf(peserta.noKartu) === -1){
+    //       kunjHT.push(peserta.noKartu)
+    //     }
+    //   }
+    //   if(isHT) {
+    //     htAll++
+    //   }
+    //   if(isDMControlled) {
+    //     if(kunjDM.indexOf(peserta.noKartu) === -1){
+    //       kunjDM.push(peserta.noKartu)
+    //     }
+    //   }
+    //   if(isDM) {
+    //     dmAll++
+    //   }
+    // }
 
-    let inputHT = 0
-    if(htAll < app.config.HT) {
-      htAll = app.config.HT
-    }
-    app.spinner.succeed(`HT Prolanis terkendali: ${kunjHT.length} dari kunj HT: ${htAll} atau: ${Math.floor(1000*kunjHT.length/htAll)/10} %`)
-    if(100*kunjHT.length/htAll < 5){
-      let htNum = kunjHT.length
-      while (100*htNum/htAll < 5 ){
-        inputHT++
-        htNum++
-      }
-      app.spinner.succeed(`kunj HT yg harus diinput: ${inputHT}`)
-    }
+    // let inputHT = 0
+    // if(htAll < app.config.HT) {
+    //   htAll = app.config.HT
+    // }
+    // app.spinner.succeed(`HT Prolanis terkendali: ${kunjHT.length} dari kunj HT: ${htAll} atau: ${Math.floor(1000*kunjHT.length/htAll)/10} %`)
+    // if(100*kunjHT.length/htAll < 5){
+    //   let htNum = kunjHT.length
+    //   while (100*htNum/htAll < 5 ){
+    //     inputHT++
+    //     htNum++
+    //   }
+    //   app.spinner.succeed(`kunj HT yg harus diinput: ${inputHT}`)
+    // }
 
-    let inputDM = 0
-    if(dmAll < app.config.DM) {
-      dmAll = app.config.DM
-    }
-    app.spinner.succeed(`DM Prolanis terkendali: ${kunjDM.length} dari kunj DM: ${dmAll} atau: ${Math.floor(1000*kunjDM.length/dmAll)/10} %`)
-    if(100*kunjDM.length/dmAll < 5){
-      let dmNum = kunjDM.length
-      while (100*dmNum/dmAll < 5 ){
-        inputDM++
-        dmNum++
-      }
-      app.spinner.succeed(`kunj DM yg harus diinput: ${inputDM}`)
-    }
+    // let inputDM = 0
+    // if(dmAll < app.config.DM) {
+    //   dmAll = app.config.DM
+    // }
+    // app.spinner.succeed(`DM Prolanis terkendali: ${kunjDM.length} dari kunj DM: ${dmAll} atau: ${Math.floor(1000*kunjDM.length/dmAll)/10} %`)
+    // if(100*kunjDM.length/dmAll < 5){
+    //   let dmNum = kunjDM.length
+    //   while (100*dmNum/dmAll < 5 ){
+    //     inputDM++
+    //     dmNum++
+    //   }
+    //   app.spinner.succeed(`kunj DM yg harus diinput: ${inputDM}`)
+    // }
 
-    let inputSakit = inputHT + inputDM
-    app.spinner.succeed(`rujukan: ${rujukan} dari kunj sakit: ${app.kunjSakitBlnIni.length} atau: ${Math.floor(1000*rujukan/app.kunjSakitBlnIni.length)/10} %`)
-    if( 100*rujukan/app.kunjSakitBlnIni.length > 15 ){
-      let kunjSakit = app.kunjSakitBlnIni.length + inputSakit
-      while (100*rujukan/kunjSakit > 15){
-        kunjSakit++
-        inputSakit++
-      }
-      app.spinner.succeed(`Kunj sakit yg harus diinput: ${inputSakit}`)
-    }
+    // let inputSakit = inputHT + inputDM
+    // app.spinner.succeed(`rujukan: ${rujukan} dari kunj sakit: ${app.kunjSakitBlnIni.length} atau: ${Math.floor(1000*rujukan/app.kunjSakitBlnIni.length)/10} %`)
+    // if( 100*rujukan/app.kunjSakitBlnIni.length > 15 ){
+    //   let kunjSakit = app.kunjSakitBlnIni.length + inputSakit
+    //   while (100*rujukan/kunjSakit > 15){
+    //     kunjSakit++
+    //     inputSakit++
+    //   }
+    //   app.spinner.succeed(`Kunj sakit yg harus diinput: ${inputSakit}`)
+    // }
 
     let kekurangan = 0
     app.spinner.succeed(`contact rate ${uniqKartu.length} dari ${app.config.JML} atau: ${Math.floor(1000 * uniqKartu.length/app.config.JML)/10} %` )
@@ -165,7 +165,8 @@ module.exports = async (isPM2) => {
       app.spinner.succeed(`kekurangan contact rate: ${kekurangan}`);
     }
 
-    if(inputSakit || kekurangan || inputHT ){
+    if(kekurangan ){
+    // if(inputSakit || kekurangan || inputHT ){
 
       //get peserta yg akan diinput
       app.spinner.start(`tgl ${app.now} s.d. ${app.end}`)
@@ -182,20 +183,20 @@ module.exports = async (isPM2) => {
         app.spinner.succeed(`akan diinput: ${akanDiinput}`)
 
         // cek mulai dari sini ya...
-        if(inputSakit > 50){
-          inputSakit = 50
-        }
-        if(akanDiinput > 50){
-          akanDiinput = 50
-        }
+        // if(inputSakit > 50){
+        //   inputSakit = 50
+        // }
+        // if(akanDiinput > 50){
+        //   akanDiinput = 50
+        // }
 
         // const listAll = await app.getPeserta()
         await app.getPesertaInput({
           akanDiinput,
           uniqKartu: [...uniqKartu, ...kunjIni],
-          inputSakit,
-          inputHT,
-          inputDM
+          inputSakit:0,
+          inputHT:0,
+          inputDM:0
         })
       }
     }
