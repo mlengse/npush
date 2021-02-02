@@ -194,9 +194,9 @@ module.exports = async (isPM2) => {
         await app.getPesertaInput({
           akanDiinput,
           uniqKartu: [...uniqKartu, ...kunjIni],
-          inputSakit:0,
-          inputHT:0,
-          inputDM:0
+          inputSakit,
+          inputHT,
+          inputDM
         })
       }
     }
