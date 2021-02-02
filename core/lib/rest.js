@@ -293,14 +293,6 @@ exports._getPesertaInput = async({
   inputDM
 }) => {
 
-  if(inputSakit > 200) {
-    inputSakit = 200
-  }
-
-  if(akanDiinput > 200){
-    akanDiinput = 200
-  }
-
   try {
     // let blnThn = that.blnThnGetPst()
     // let kunjBlnIni = []
