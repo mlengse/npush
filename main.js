@@ -184,12 +184,12 @@ module.exports = async (isPM2) => {
         // cek mulai dari sini ya...
 
         // const listAll = await app.getPeserta()
-        if(inputSakit > 200) {
-          inputSakit = 200
+        if(inputSakit > 50) {
+          inputSakit = 50
         }
       
-        if(akanDiinput > 200){
-          akanDiinput = 200
+        if(akanDiinput > 50){
+          akanDiinput = 50
         }
       
       
