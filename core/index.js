@@ -41,6 +41,12 @@ module.exports = class Core {
       KDDOKTER: this.config.KDDOKTER || dokter[0].kdDokter
     })
 
+    if(this.config.PCAREUSR.includes('-')){
+      this.config.PROVIDER = this.config.PCAREUSR.split('-')[1]
+    } else {
+      this.config.PROVIDER = this.config.PCAREUSR
+    }
+
     // this.getTgl()
     // this.getUser()
     // this.getPlan()

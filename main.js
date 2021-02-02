@@ -207,7 +207,7 @@ module.exports = async (isPM2) => {
       let detailList = app.randomList.map( ({no, ket}) => ({
         ket,
         det: {
-          "kdProviderPeserta": app.config.PCAREUSR,
+          "kdProviderPeserta": app.config.PROVIDER,
           "tglDaftar": app.tglDaftar(),
           "noKartu": no,
           "kdPoli": ket === 'sht' ? '021' : '001',
