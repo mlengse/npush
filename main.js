@@ -208,7 +208,7 @@ module.exports = async (isPM2) => {
         ket,
         det: {
           "kdProviderPeserta": app.config.PROVIDER,
-          "tglDaftar": app.tglDaftar(),
+          "tglDaftar": app.tglDaftarA(`${app.getRandomInt(1, 31)}-${app.blnThn()}`),
           "noKartu": no,
           "kdPoli": ket === 'sht' ? '021' : '001',
           "keluhan": null,
