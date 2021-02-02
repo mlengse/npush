@@ -182,6 +182,12 @@ module.exports = async (isPM2) => {
         app.spinner.succeed(`akan diinput: ${akanDiinput}`)
 
         // cek mulai dari sini ya...
+        if(inputSakit > 50){
+          inputSakit = 50
+        }
+        if(akanDiinput > 50){
+          akanDiinput = 50
+        }
 
         // const listAll = await app.getPeserta()
         await app.getPesertaInput({
