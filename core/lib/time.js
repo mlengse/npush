@@ -6,8 +6,8 @@ exports.blnThn = () => moment('31-01-2021', 'DD-MM-YYYY').add(-1, 'd').format('M
 exports.tglHariIni = () => `${this.tgl()}-${this.blnThn()}`
 exports.now = moment('31-01-2021', 'DD-MM-YYYY').format('D')
 exports.end = moment('31-01-2021', 'DD-MM-YYYY').endOf('month').format('D')
-exports.blnThnGetPst = () => moment('31-01-2021', 'DD-MM-YYYY').add(-6, 'month').format('MM-YYYY')
-exports.tglBlnLalu = () => moment('31-01-2021', 'DD-MM-YYYY').add(-3, 'month').format('D-MM-YYYY')
+exports.blnThnGetPst = () => moment('31-01-2021', 'DD-MM-YYYY').add(-3, 'month').format('MM-YYYY')
+exports.tglBlnLalu = () => moment('31-01-2021', 'DD-MM-YYYY').add(-1, 'month').format('D-MM-YYYY')
 exports.tglKmrn = tgl  => moment(tgl, 'D-MM-YYYY').clone().add(-1,'d').format('D-MM-YYYY')
 exports.tglDaftar = () => {
  if(moment('31-01-2021', 'DD-MM-YYYY').day() === 0){
