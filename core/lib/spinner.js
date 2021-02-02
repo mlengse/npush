@@ -2,7 +2,7 @@ const ora = require('ora')
 exports.spinner =(process.platform === 'win32' && !process.env.NODE_APP_INSTANCE) ? ora({
   stream: process.stdout
 }): {
-  start: text => '',// console.log(`start: ${text}`),
+  start: text => console.info(`start: ${text}`),
   stop: _ => '',
   succeed: text => console.log(`done: ${text}`),
   warn: text => console.info(`warn: ${text}`),
