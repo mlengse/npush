@@ -376,7 +376,7 @@ exports._getPesertaInput = async({
             })
   
             // console.log(pst)
-            if(pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PCAREUSR) {
+            if(pst && pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PCAREUSR) {
               if(pst.pstProl && pst.pstProl !== ''){
                 if(pst.pstProl.includes('HT') && randomListHT.length < inputHT){
                   randomListHT.push(pst.noKartu)
