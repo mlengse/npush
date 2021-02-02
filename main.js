@@ -184,15 +184,6 @@ module.exports = async (isPM2) => {
         // cek mulai dari sini ya...
 
         // const listAll = await app.getPeserta()
-        if(inputSakit > 50) {
-          inputSakit = 50
-        }
-      
-        if(akanDiinput > 50){
-          akanDiinput = 50
-        }
-      
-      
         await app.getPesertaInput({
           akanDiinput,
           uniqKartu: [...uniqKartu, ...kunjIni],
