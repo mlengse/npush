@@ -186,9 +186,9 @@ module.exports = async (isPM2) => {
         // if(inputSakit > 50){
         //   inputSakit = 50
         // }
-        // if(akanDiinput > 50){
-        //   akanDiinput = 50
-        // }
+        if(akanDiinput > 50){
+          akanDiinput = 50
+        }
 
         // const listAll = await app.getPeserta()
         await app.getPesertaInput({
