@@ -368,29 +368,29 @@ exports._getPesertaInput = async({
             randomListDM.indexOf(noka) === -1 ||
             randomListSht.indexOf(noka) === -1
           ) {
-            randomListSht.push(noka)
-            // let pst = await that.getPesertaByNoka({
-            //   noka
-            // })
+            // randomListSht.push(noka)
+            let pst = await that.getPesertaByNoka({
+              noka
+            })
   
-            // // console.log(pst)
-            // if(pst && pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PROVIDER) {
-            //   if(pst.pstProl && pst.pstProl !== ''){
-            //     if(pst.pstProl.includes('HT') && randomListHT.length < inputHT){
-            //       randomListHT.push(pst.noKartu)
-            //     }
-            //     if(pst.pstProl.includes('DM') && randomListDM.length < inputDM){
-            //       randomListDM.push(pst.noKartu)
-            //     }
-            //   } else {
-            //     if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit){
-            //       randomListSkt.push(pst.noKartu)
-            //     } else if((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
-            //       randomListSht.push(pst.noKartu)
-            //     }
-            //   }
+            // console.log(pst)
+            if(pst && pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PROVIDER) {
+              if(pst.pstProl && pst.pstProl !== ''){
+                if(pst.pstProl.includes('HT') && randomListHT.length < inputHT){
+                  randomListHT.push(pst.noKartu)
+                }
+                if(pst.pstProl.includes('DM') && randomListDM.length < inputDM){
+                  randomListDM.push(pst.noKartu)
+                }
+              } else {
+                if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit){
+                  randomListSkt.push(pst.noKartu)
+                } else if((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
+                  randomListSht.push(pst.noKartu)
+                }
+              }
   
-            // }
+            }
   
           }
         }
