@@ -15,7 +15,7 @@ module.exports = async (isPM2) => {
     app.cekPstSudah =[]
 
     let kunjIni = (await app.getPendaftaranProvider({
-      tanggal: app.tglDaftar()
+      tanggal: '30-01-2021'//app.tglDaftar()
     })).map(({ peserta: { noKartu }}) => noKartu)
 
     //get kunj bln ini

@@ -1,7 +1,8 @@
 const moment = require('moment')
 
-exports.tgl = () => moment().add(-1, 'd').date()
-exports.blnThn = () => moment().add(-1, 'd').format('MM-YYYY')
+
+exports.tgl = () => moment().add(-3, 'd').date()
+exports.blnThn = () => '01-2021'//moment().add(-1, 'd').format('MM-YYYY')
 exports.tglHariIni = () => `${this.tgl()}-${this.blnThn()}`
 exports.xTimestamp = () => moment.utc().format('X')
 exports.now = moment().format('D')
