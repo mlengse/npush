@@ -307,10 +307,10 @@ exports._getPesertaInput = async({
     // that.dataBBTB = []
 
     let baleni = async () => {
-      that.spinner.succeed(`random list sehat ready: ${randomListSht.length}`)
-      that.spinner.succeed(`random list dm ready: ${randomListDM.length}`)
-      that.spinner.succeed(`random list ht ready: ${randomListHT.length}`)
-      that.spinner.succeed(`random list sakit ready: ${randomListSkt.length}`)
+      // that.spinner.succeed(`random list sehat ready: ${randomListSht.length}`)
+      // that.spinner.succeed(`random list dm ready: ${randomListDM.length}`)
+      // that.spinner.succeed(`random list ht ready: ${randomListHT.length}`)
+      // that.spinner.succeed(`random list sakit ready: ${randomListSkt.length}`)
 
       let kunjHariIni = await that.getPendaftaranProvider({
         tanggal
