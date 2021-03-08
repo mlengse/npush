@@ -159,9 +159,9 @@ module.exports = async (isPM2) => {
 
     let kekurangan = 0
     app.spinner.succeed(`contact rate ${uniqKartu.length} dari ${app.config.JML} atau: ${Math.floor(1000 * uniqKartu.length/app.config.JML)/10} %` )
-    if (uniqKartu.length/app.config.JML < 0.15) {
+    if (uniqKartu.length/app.config.JML < 0.1756) {
       //handle angka kontak
-      kekurangan = Math.floor((app.config.JML*0.15) - uniqKartu.length)
+      kekurangan = Math.floor((app.config.JML*0.1756) - uniqKartu.length)
       app.spinner.succeed(`kekurangan contact rate: ${kekurangan}`);
     }
 

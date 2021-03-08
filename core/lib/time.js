@@ -1,13 +1,19 @@
 const moment = require('moment')
+
+let baseDate = moment().format('DD-MM-YYYY')
+if(process.env.BASE_DATE){
+  baseDate = process.env.BASE_DATE
+}
+
+// moment.now = () => +new Date('2021', '2', '28');
 exports.xTimestamp = () => moment.utc().format('X')
-// moment.now = () => +new Date('2021', '0', '30');
-exports.tgl = () => moment().add(-1, 'd').date()
-exports.blnThn = () => moment().add(-1, 'd').format('MM-YYYY')
+exports.tgl = () => moment(baseDate, 'DD-MM-YYYY').add(-1, 'd').date()
+exports.blnThn = () => moment(baseDate, 'DD-MM-YYYY').add(-1, 'd').format('MM-YYYY')
 exports.tglHariIni = () => `${this.tgl()}-${this.blnThn()}`
-exports.now = moment().format('D')
-exports.end = moment().endOf('month').format('D')
-exports.blnThnGetPst = () => moment().add(-3, 'month').format('MM-YYYY')
-exports.tglBlnLalu = () => moment().add(-1, 'month').format('D-MM-YYYY')
+exports.now = moment(baseDate, 'DD-MM-YYYY').format('D')
+exports.end = moment(baseDate, 'DD-MM-YYYY').endOf('month').format('D')
+exports.blnThnGetPst = () => moment(baseDate, 'DD-MM-YYYY').add(-3, 'month').format('MM-YYYY')
+exports.tglBlnLalu = () => moment(baseDate, 'DD-MM-YYYY').add(-1, 'month').format('D-MM-YYYY')
 exports.tglKmrn = tgl  => moment(tgl, 'D-MM-YYYY').clone().add(-1,'d').format('D-MM-YYYY')
 exports.tglDaftarA = (a) => {
   if(moment(a, 'DD-MM-YYYY').day() === 0){
@@ -25,17 +31,17 @@ exports.tglDaftarA = (a) => {
   } 
 } 
 exports.tglDaftar = () => {
- if(moment().day() === 0){
-  if(moment().add(-4, 'd').day() === 0){
-    return moment().add(-3, 'd').format('DD-MM-YYYY')
+ if(moment(baseDate, 'DD-MM-YYYY').day() === 0){
+  if(moment(baseDate, 'DD-MM-YYYY').add(-4, 'd').day() === 0){
+    return moment(baseDate, 'DD-MM-YYYY').add(-3, 'd').format('DD-MM-YYYY')
   } else {
-    return moment().add(-4, 'd').format('DD-MM-YYYY')
+    return moment(baseDate, 'DD-MM-YYYY').add(-4, 'd').format('DD-MM-YYYY')
   }
  } else {
-  if(moment().add(-3, 'd').day() === 0){
-    return moment().add(-2, 'd').format('DD-MM-YYYY')
+  if(moment(baseDate, 'DD-MM-YYYY').add(-3, 'd').day() === 0){
+    return moment(baseDate, 'DD-MM-YYYY').add(-2, 'd').format('DD-MM-YYYY')
   } else {
-    return moment().add(-3, 'd').format('DD-MM-YYYY')
+    return moment(baseDate, 'DD-MM-YYYY').add(-3, 'd').format('DD-MM-YYYY')
   }
  } 
 } 
