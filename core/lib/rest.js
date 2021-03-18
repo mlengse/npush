@@ -406,6 +406,17 @@ exports._getPesertaInput = async({
       await baleni()
     }
 
+    if(!that.config.RPPT){
+      randomListSkt = [ ...randomListSkt, ...randomListDM, ...randomListHT]
+      randomListDM = []
+      randomListHT = []
+    }
+
+    if(!that.config.KUNJ_SAKIT){
+      randomListSht = [ ...randomListSkt, ...randomListSht]
+      randomListSkt = []
+    }
+
     that.spinner.succeed(`random list sehat ready: ${randomListSht.length}`)
     that.spinner.succeed(`random list dm ready: ${randomListDM.length}`)
     that.spinner.succeed(`random list ht ready: ${randomListHT.length}`)
