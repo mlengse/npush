@@ -106,7 +106,9 @@ exports._listKontak =  async ({ that }) => {
         let objRow = {}
         if(id){
           row.map((col, id) => {
-            objRow[headers[id].split(' ').join('_')] = col
+            if(col && col.length){
+              objRow[headers[id].split(' ').join('_')] = col
+            }
           })
           rows[id] = objRow
         }
