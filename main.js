@@ -231,14 +231,16 @@ module.exports = async (isPM2) => {
         // app.spinner.succeed(`${kunjIni.indexOf(pendaftaran.det.noKartu)}, ${pendaftaran.det.noKartu}`)
 
         app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
-        let response = await app.addPendaftaran({
+        let daftResponse, kunjResponse, mcuResponse 
+        
+        daftResponse = await app.addPendaftaran({
           pendaftaran: pendaftaran.det
         })
-        if(response) app.spinner.succeed(JSON.stringify(response))
+        if(daftResponse) app.spinner.succeed(JSON.stringify(daftResponse))
 
         if(pendaftaran.det.kunjSakit) {
           //add kunj
-          let kunjResponse = await app.sendKunj({ daft: pendaftaran })
+          kunjResponse = await app.sendKunj({ daft: pendaftaran })
           if(kunjResponse) {
             app.spinner.succeed(JSON.stringify(kunjResponse))
             if(kunjResponse && kunjResponse.response && kunjResponse.response.message && (pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht')){
@@ -246,17 +248,26 @@ module.exports = async (isPM2) => {
 
         //-------------------------------------------------------------------------
 
-              let response = await app.sendMCU({
+              mcuResponse = await app.sendMCU({
                 daft: pendaftaran,
                 noKunjungan:kunjResponse.response.message 
               })
-              if(response) app.spinner.succeed(JSON.stringify(response))
+              if(mcuResponse) app.spinner.succeed(JSON.stringify(mcuResponse))
       
         //-------------------------------------------------------------------------
             }
           }
 
         }
+
+        await app.sendToWA({
+          message: JSON.stringify({
+            pendaftaran,
+            daftResponse,
+            kunjResponse,
+            mcuResponse
+          })
+        })
       }
 
     }

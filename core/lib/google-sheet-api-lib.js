@@ -93,11 +93,12 @@ exports._listKontak =  async ({ that }) => {
   const auth = await authorize()
 
   const sheets = google.sheets({version: 'v4', auth});
-  sheets.spreadsheets.values.get({
+  return await new Promise ( (resolve, reject) => sheets.spreadsheets.values.get({
     spreadsheetId: that.config.SHEET_ID,
     range: 'Sheet1',
   }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
+    that.spinner.start('start listing')
+    if (err) reject('The API returned an error: ' + err);
     const rows = res.data.values;
     if (rows.length) {
       // Print columns A and E, which correspond to indices 0 and 4.
@@ -115,10 +116,12 @@ exports._listKontak =  async ({ that }) => {
         // console.log(`${row[0]}, ${row[4]}`);
       });
       rows.shift()
-      console.log(rows)
+      that.spinner.succeed('data found', rows.length)
+      resolve(rows)
 
     } else {
-      console.log('No data found.');
+      that.spinner.succeed('no data found')
+      resolve([]);
     }
-  });
+  }));
 }

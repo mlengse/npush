@@ -9,52 +9,50 @@ const app = new Core(config)
 module.exports = async (isPM2) => {
 
   try{
-    // await app.init()
-    await app.listKontak()
+    await app.init()
 
-    // app.dataBBTB = []
-    // app.cekPstSudah =[]
+    let kontaks = (await app.listKontak()).filter(({ Tanggal }) => app.checkDateA( Tanggal ))
 
-    // let kunjIni = (await app.getPendaftaranProvider({
-    //   tanggal: '20-12-2020'
-    // }))
-    // .filter(({
-    //   kunjSakit,
-    //   status
-    // }) => kunjSakit && status )
-    // .map(({
-    //   noUrut, 
-    //   tgldaftar, 
-    //   peserta: { 
-    //     noKartu 
-    //   },
-    //   poli: {
-    //     kdPoli
-    //   }
-    // }) => ({
-    //   noUrut,
-    //   noKartu,
-    //   tgldaftar,
-    //   kdPoli
-    // }))
+    let listDaft = (await app.getPendaftaranProvider()).map(({ peserta: {noKartu}}) => noKartu)
 
-    // console.log(kunjIni.length)
+    for (kontak of kontaks){
+      //check if kontak exist
+      if( !listDaft.filter( e => e === kontak.No_JKN ).length ){
+        let peserta = await app.getPesertaByNoka({
+          noka: kontak.No_JKN
+        })
+  
+        if(peserta){
+          kontak = Object.assign({}, kontak, peserta)
+  
+          //check if kontak not registered yet
+          let historyCheck = (await app.getRiwayatKunjungan({ peserta })).filter( ({ tglKunjungan }) => app.checkDate( tglKunjungan, kontak.Tanggal))
+  
+          if(!historyCheck.length){
+  
+            let message = await app.sendToWS({kontak})
 
-    // for( let kunj of kunjIni){
-    //   console.log(kunj)
-    //   let re = await app.deletePendaftaran({
-    //     ...kunj
-    //   })
+            if(!JSON.stringify(message.daftResponse).includes('sudah di-entri')) {
 
-    //   console.log(re)
-    // }
+              await app.sendToWA({
+                message
+              })
 
+            }
+  
+          }
+    
+        }
+  
+      }
+
+    }
 
     await app.close(isPM2)
 
     console.log(`process done: ${new Date()}`)
   }catch(e){
-    console.error(JSON.stringify(e))
+    console.error(e)
     console.error(`process error: ${new Date()}`)
   }
 }

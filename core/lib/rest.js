@@ -52,7 +52,7 @@ exports._sendMCU = async ({ that, noKunjungan, daft }) => {
     lemakDarahChol: 0,
     lemakDarahTrigli: 0,
     gulaDarahSewaktu: 0,
-    gulaDarahPuasa: daft.ket === 'dm' ? that.getGDP() : 0,
+    gulaDarahPuasa: daft.ket === 'dm' ? (daft.kontak && daft.kontak.GDP ? daft.kontak.GDP : that.getGDP()) : 0,
     gulaDarahPostPrandial: 0,
     gulaDarahHbA1c: 0,
     fungsiHatiSGOT: 0,
@@ -125,6 +125,16 @@ exports._getMCU = async({
 
 
 exports._sendKunj = async ({that, daft}) => {
+  // console.log(daft)
+  let sistole, diastole, kdDiag1, kdDokter
+  if(daft.kontak) {
+    kdDiag1 = kontak.Diagnosis
+    kdDokter = kontak.Petugas.split('\t')[0]
+    if(daft.ket === 'ht'){
+      sistole = kontak.Sistolik
+      diastole = kontak.Diastolik
+    } 
+  }
 
   let bbtb = that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0]
   if(bbtb && bbtb.beratBadan){
@@ -135,8 +145,8 @@ exports._sendKunj = async ({that, daft}) => {
       kdPoli: daft.det.kdPoli,
       keluhan: daft.ket === 'skt' ? '-' : daft.ket,
       kdSadar: "01",
-      sistole: that.getSystole(),
-      diastole: that.getDiastole(),
+      sistole: sistole || that.getSystole(),
+      diastole: diastole || that.getDiastole(),
       beratBadan: that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0].beratBadan,
       tinggiBadan: that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0].tinggiBadan,
       respRate: that.getRR(),
@@ -144,8 +154,8 @@ exports._sendKunj = async ({that, daft}) => {
       terapi: "",
       kdStatusPulang: "3",
       tglPulang: daft.det.tglDaftar,
-      kdDokter: that.config.KDDOKTER,
-      kdDiag1: daft.ket === 'skt' ? 'Z00' : daft.ket === 'ht' ? 'I10' : 'E11',
+      kdDokter: kdDokter || that.config.KDDOKTER,
+      kdDiag1: daft.ket === 'skt' ? (kdDiag1 || 'Z00') : daft.ket === 'ht' ? 'I10' : 'E11',
       kdDiag2: null,
       kdDiag3: null,
       kdPoliRujukInternal: null,
@@ -153,8 +163,8 @@ exports._sendKunj = async ({that, daft}) => {
       kdTacc: 0,
       alasanTacc: null
     }
-  
-    // console.log(kunjungan)
+
+    // console.log(that.kunjunganNow)
   
     try {
       that.spinner.start(`send kunjungan ${daft.det.noKartu} ${daft.det.tglDaftar}`)
@@ -489,22 +499,24 @@ exports._getRiwayatKunjungan = async ({that, peserta}) => {
     })
 
     let res = await instance.get(`/kunjungan/peserta/${peserta.noKartu}`)
+    that.spinner.succeed()
 
     if(res && res.data && res.data.response && res.data.response.list.length){
       let riws = res.data.response.list
-      // let tinggiBadan = 0
-      // let beratBadan = 0
       if(riws && riws.length) for(let riw of riws){
         if(riw.beratBadan && riw.tinggiBadan){
-          // tinggiBadan = riw.tinggiBadan
-          // beratBadan = riw.beratBadan
-          // console.log(riw)
           if(riw.tinggiBadan && riw.beratBadan){
+            if(!that.dataBBTB){
+              that.dataBBTB = []
+            }
             that.dataBBTB.push({
               noKartu: riw.peserta.noKartu,
               tinggiBadan: riw.tinggiBadan,
               beratBadan: riw.beratBadan
             })
+            if(!that.cekPstSudah){
+              that.cekPstSudah = []
+            }
             that.cekPstSudah.push(riw.peserta.noKartu)
           }
 
@@ -517,35 +529,37 @@ exports._getRiwayatKunjungan = async ({that, peserta}) => {
     }
     return []
 
-  }catch({
-    response
-  }){
-    return response
+  }catch(e){
+    console.error(e.response.data || e.response || e)
   }
 }
 
 exports._getPesertaByNoka = async ({ that, noka}) => {
-  try{
-    const { headers } = await that.getArgs()
-
-    that.spinner.start(`get peserta by no kartu: ${noka}`)
-
-    const baseURL = `${that.config.APIV3}`
+  noka = (escape(noka)).split(' ').join('')
+  if(noka.length === 13){
+    try{
+      const { headers } = await that.getArgs()
   
-    const instance = axios.create({
-      baseURL,
-      headers
-    })
-
-    let res = await instance.get(`/peserta/noka/${noka}`)
-    if(res && res.data && res.data.response ){
-      return res.data.response
+      that.spinner.start(`get peserta by no kartu: ${noka}`)
+  
+      const baseURL = `${that.config.APIV3}`
+    
+      const instance = axios.create({
+        baseURL,
+        headers
+      })
+  
+      let res = await instance.get(`/peserta/noka/${noka}`)
+      if(res && res.data && res.data.response ){
+        return res.data.response
+      }
+      return null
+  
+    }catch(e){
+      console.error(e)
+      return null
     }
-
-  }catch({
-    response
-  }){
-    return response
   }
+  return null
 
 }

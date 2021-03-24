@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/mlengse/npush#readme",
   "dependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
     "googleapis": "^68.0.0",
@@ -25,6 +25,7 @@
     "mysql": "^2.18.1",
     "node-cron": "^2.0.3",
     "node-rest-client": "^3.1.0",
-    "ora": "^5.0.0"
+    "ora": "^5.0.0",
+    "redis": "^3.0.2"
   }
 }
