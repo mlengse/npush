@@ -499,7 +499,7 @@ exports._getRiwayatKunjungan = async ({that, peserta}) => {
     })
 
     let res = await instance.get(`/kunjungan/peserta/${peserta.noKartu}`)
-    that.spinner.succeed()
+    // that.spinner.succeed()
 
     if(res && res.data && res.data.response && res.data.response.list.length){
       let riws = res.data.response.list
@@ -530,7 +530,7 @@ exports._getRiwayatKunjungan = async ({that, peserta}) => {
     return []
 
   }catch(e){
-    console.error(e.response.data || e.response || e)
+    console.error(e)
   }
 }
 

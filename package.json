@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/mlengse/npush#readme",
   "dependencies": {
+    "arangojs": "^7.3.0",
     "axios": "^0.21.1",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",

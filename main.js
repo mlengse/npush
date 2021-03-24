@@ -260,14 +260,17 @@ module.exports = async (isPM2) => {
 
         }
 
-        await app.sendToWA({
-          message: JSON.stringify({
+        let sendText = await app.sendToWA({
+          push: true,
+          message: JSON.parse(JSON.stringify({
             pendaftaran,
             daftResponse,
             kunjResponse,
             mcuResponse
-          })
+          }))
         })
+
+        await app.upsertKontakJKN({doc: sendText})
       }
 
     }

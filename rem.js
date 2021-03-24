@@ -11,40 +11,53 @@ module.exports = async (isPM2) => {
   try{
     await app.init()
 
-    let kontaks = (await app.listKontak()).filter(({ Tanggal }) => app.checkDateA( Tanggal ))
-
+    let kontaks = await app.listKontak()
     let listDaft = (await app.getPendaftaranProvider()).map(({ peserta: {noKartu}}) => noKartu)
 
     for (kontak of kontaks){
-      //check if kontak exist
-      if( !listDaft.filter( e => e === kontak.No_JKN ).length ){
-        let peserta = await app.getPesertaByNoka({
-          noka: kontak.No_JKN
-        })
-  
-        if(peserta){
-          kontak = Object.assign({}, kontak, peserta)
-  
-          //check if kontak not registered yet
-          let historyCheck = (await app.getRiwayatKunjungan({ peserta })).filter( ({ tglKunjungan }) => app.checkDate( tglKunjungan, kontak.Tanggal))
-  
-          if(!historyCheck.length){
-  
-            let message = await app.sendToWS({kontak})
+      kontak = await app.upsertKontakJKN({ doc: kontak })
+      if(app.checkDateA(kontak.Tanggal)) {
+        //check if kontak exist
+        if( !listDaft.filter( e => e === kontak.No_JKN ).length ){
+          let peserta 
+          if(kontak.aktif || kontak.ketAktif){
+            peserta = kontak
+          } else {
+            let pstJKN = await app.getPesertaByNoka({
+              noka: kontak.No_JKN
+            })
+            kontak = Object.assign({}, kontak, pstJKN)
+            peserta = await app.upsertKontakJKN({ doc: kontak })
+          }
+    
+          if(peserta && !peserta.daftResponse && peserta.aktif &&  peserta.kdProviderPst.kdProvider.trim() === app.config.PROVIDER ){
 
-            if(!JSON.stringify(message.daftResponse).includes('sudah di-entri')) {
+            // check if kontak not registered yet
+            let historyCheck = (await app.getRiwayatKunjungan({ peserta })).filter( ({ tglKunjungan }) => app.checkDate( tglKunjungan, kontak.Tanggal))
 
-              await app.sendToWA({
-                message
-              })
+            if(!historyCheck.length){
+    
+              let message = await app.sendToWS({kontak})
 
+              message = await app.upsertKontakJKN({ doc: message })
+
+              if(!message.from && message.daftResponse && !JSON.stringify(message.daftResponse).includes('sudah di-entri')) {
+
+                let textwa = await app.sendToWA({
+                  message
+                })
+
+                await app.upsertKontakJKN({ doc: textwa })
+
+              }
+    
             }
-  
+      
           }
     
         }
-  
       }
+
 
     }
 
