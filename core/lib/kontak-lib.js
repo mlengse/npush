@@ -22,7 +22,7 @@ exports._sendToWA = async ({ that, message, push }) => {
     }
 
     if(push){
-      text = `Yth Bpk/Ibu ${message.nama}, untuk pencegahan penyebaran Covid-19, tetap lakukan 3M Plus: \nMemakai masker dengan benar \nMenjaga jarak \nMencuci tangan dengan sabun dan air mengalir \nPlus menjaga pola hidup bersih dan sehat. \nPuskesmas ${process.env.PUSKESMAS}`
+      text = `Yth Bpk/Ibu ${message.nama},\nkami dari Puskesmas ${process.env.PUSKESMAS} menginformasikan, untuk pencegahan penyebaran Covid-19, tetap lakukan 3M Plus: \nMemakai masker dengan benar \nMenjaga jarak \nMencuci tangan dengan sabun dan air mengalir \nPlus menjaga pola hidup bersih dan sehat. `
     }
 
     let { response } = message.daftResponse

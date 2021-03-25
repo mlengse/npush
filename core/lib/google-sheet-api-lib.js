@@ -116,7 +116,7 @@ exports._listKontak =  async ({ that }) => {
         // console.log(`${row[0]}, ${row[4]}`);
       });
       rows.shift()
-      that.spinner.succeed('data found', rows.length)
+      that.spinner.succeed(`data found: ${rows.length}`)
       resolve(rows)
 
     } else {

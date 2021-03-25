@@ -451,7 +451,7 @@ exports._getPesertaInput = async({
     ]
 
   }catch(e){
-    console.error(e)
+    console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
   }
 }
 
@@ -530,7 +530,7 @@ exports._getRiwayatKunjungan = async ({that, peserta}) => {
     return []
 
   }catch(e){
-    console.error(e)
+    console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
   }
 }
 
@@ -556,7 +556,7 @@ exports._getPesertaByNoka = async ({ that, noka}) => {
       return null
   
     }catch(e){
-      console.error(e)
+      console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
       return null
     }
   }

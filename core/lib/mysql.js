@@ -92,11 +92,15 @@ exports._getSettings = async ({ that }) => await that.connect({
 exports._getPatient = async ({ that, message}) => {
 	
   try{
-    let res = await that.connect(`SELECT * FROM patients WHERE no_kartu = "${message.pendaftaran.det.noKartu}"`)
+    let res = await that.connect({
+      query: `SELECT * FROM patients WHERE no_kartu = "${message.pendaftaran.det.noKartu}"`
+    })
     if(res.length){
       message = Object.assign({}, message, res[0])
       if( (!message.no_hp || (message.no_hp && !message.no_hp.match(/^(08)([0-9]){1,12}$/))) && message.no_kartu) {
-        res = await this.connect(`SELECT * FROM bpjs_verifications WHERE no_bpjs = "${message.no_kartu}"`)
+        res = await that.connect({
+          query: `SELECT * FROM bpjs_verifications WHERE no_bpjs = "${message.no_kartu}"`
+        })
         if(res[0] && res[0].json_response && res[0].json_response.response) {
           message = Object.assign({}, message, JSON.parse(res[0].json_response.response))
   
@@ -107,7 +111,7 @@ exports._getPatient = async ({ that, message}) => {
       }
     }
   }catch(err) {
-    console.error(`${new Date()} ${err}`)
+    console.error(`${new Date()} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`)
   }
   return message
 }

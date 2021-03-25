@@ -280,7 +280,7 @@ module.exports = async (isPM2) => {
 
     console.log(`process done: ${new Date()}`)
   }catch(e){
-    console.error(e)
-    console.error(`process error: ${new Date()}`)
+    console.error(`process error: ${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+
   }
 }
