@@ -12,13 +12,21 @@ exports._upsertKontakJKN = async ({ that, doc }) => {
 
 exports._sendToWA = async ({ that, message, push }) => {
   let text, from, errText
+
+
   text = `Terima kasih atas kepercayaan Bpk/Ibu ${message.nama} terhadap pelayanan Puskesmas ${process.env.PUSKESMAS}.`
 
-  if(push){
-    text = `Yth Bpk/Ibu ${message.nama}, untuk pencegahan penyebaran Covid-19, tetap lakukan 3M Plus: \nMemakai masker dengan benar \nMenjaga jarak \nMencuci tangan dengan sabun dan air mengalir \nPlus menjaga pola hidup bersih dan sehat. \nPuskesmas ${process.env.PUSKESMAS}`
-  }
   if(message.daftResponse){
+    if(!message.nama) {
+      message = await that.getPatient({message})
+    }
+
+    if(push){
+      text = `Yth Bpk/Ibu ${message.nama}, untuk pencegahan penyebaran Covid-19, tetap lakukan 3M Plus: \nMemakai masker dengan benar \nMenjaga jarak \nMencuci tangan dengan sabun dan air mengalir \nPlus menjaga pola hidup bersih dan sehat. \nPuskesmas ${process.env.PUSKESMAS}`
+    }
+
     let { response } = message.daftResponse
+
     if(Array.isArray(response)) {
       for(let { field, message} of response ){
         if(field === 'noKartu'){
@@ -30,8 +38,8 @@ exports._sendToWA = async ({ that, message, push }) => {
     } else if(!JSON.stringify(response).includes('noUrut')) {
       console.error(response)
     }
-    message.kunjResponse && console.error('kunj resp', message.kunjResponse)
-    message.mcuResponse && console.error('mcu resp', message.mcuResponse)
+    // message.kunjResponse && console.error('kunj resp', message.kunjResponse)
+    // message.mcuResponse && console.error('mcu resp', message.mcuResponse)
     if(message.Tlp_Peserta && message.Tlp_Peserta.match(/^(08)([0-9]){1,12}$/)){
       from = message.Tlp_Peserta
     }
@@ -70,7 +78,7 @@ exports._sendToWS = async ({ that, kontak }) => {
   //---------------------------------------
   // add pendaftaran
   let daftResponse, kunjResponse, mcuResponse, ket, pendaftaran
-  if(kontak.aktif && kontak.kdProviderPst.kdProvider.trim() === that.config.PROVIDER){
+  if(kontak.aktif /* && kontak.kdProviderPst.kdProvider.trim() === that.config.PROVIDER*/){
     switch (kontak.Kunjungan) {
       case 'Sehat':
         ket = 'sht'
@@ -91,7 +99,7 @@ exports._sendToWS = async ({ that, kontak }) => {
       kontak,
       ket,
       det: {
-        "kdProviderPeserta": that.config.PROVIDER,
+        "kdProviderPeserta": kontak.kdProviderPst.kdProvider, //that.config.PROVIDER,
         "tglDaftar": that.tglDaftarB(kontak.Tanggal),
         "noKartu": kontak.noKartu,
         "kdPoli": ket === 'sht' ? '021' : '001',

@@ -30,14 +30,14 @@ module.exports = async (isPM2) => {
             peserta = await app.upsertKontakJKN({ doc: kontak })
           }
     
-          if(peserta && !peserta.daftResponse && peserta.aktif &&  peserta.kdProviderPst.kdProvider.trim() === app.config.PROVIDER ){
+          if(peserta && !peserta.daftResponse && peserta.aktif /* &&  peserta.kdProviderPst.kdProvider.trim() === app.config.PROVIDER*/ ){
 
             // check if kontak not registered yet
             let historyCheck = (await app.getRiwayatKunjungan({ peserta })).filter( ({ tglKunjungan }) => app.checkDate( tglKunjungan, kontak.Tanggal))
 
             if(!historyCheck.length){
     
-              let message = await app.sendToWS({kontak})
+              let message = await app.sendToWS({kontak: peserta})
 
               message = await app.upsertKontakJKN({ doc: message })
 
