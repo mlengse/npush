@@ -17,7 +17,7 @@ exports._sendToWA = async ({ that, message, push }) => {
   text = `Terima kasih atas kepercayaan Bpk/Ibu ${message.nama} terhadap pelayanan Puskesmas ${process.env.PUSKESMAS}.`
 
   if(message.daftResponse){
-    if(!message.nama) {
+    if(!message.nama || !message.noHP) {
       message = await that.getPatient({message})
     }
 
@@ -46,6 +46,9 @@ exports._sendToWA = async ({ that, message, push }) => {
     if(!from && message.noHP && message.noHP.match(/^(08)([0-9]){1,12}$/)){
       from = message.noHP
     }
+    if(!from && message.no_hp && message.no_hp.match(/^(08)([0-9]){1,12}$/)){
+      from = message.no_hp
+    }
     if(from) {
       from = `62${from.substr(1)}@c.us`
       if(errText && errText.length){
@@ -58,6 +61,7 @@ exports._sendToWA = async ({ that, message, push }) => {
         that.redisPublish({
           topic: 'sendwa',
           message: JSON.stringify({
+            nama: message.nama,
             from,
             text
           })
