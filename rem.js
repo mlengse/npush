@@ -12,52 +12,60 @@ module.exports = async (isPM2) => {
     await app.init()
 
     let kontaks = await app.listKontak()
-    let listDaft = (await app.getPendaftaranProvider()).map(({ peserta: {noKartu}}) => noKartu)
+    let tanggals = [ ...new Set(kontaks.map(({ Tanggal }) => Tanggal))]
+    let listDaft = []
+    for( tanggal of tanggals){
+      let daft = (await app.getPendaftaranProvider({ 
+        tanggal: app.tglPcareFromKontak(tanggal)
+      }))
+
+      listDaft = [ ...listDaft, ...daft.map(({ peserta: {noKartu}}) => noKartu)]
+    }
+    // console.log(listDaft)
+    // let listDaft = (await app.getPendaftaranProvider()).map(({ peserta: {noKartu}}) => noKartu)
+    // listDaft = [ ...listDaft, ...(await app.getPendaftaranProvider({ tanggal: app.tglKemarin()})).map(({ peserta: {noKartu}}) => noKartu)]
 
     for (kontak of kontaks){
       kontak = await app.upsertKontakJKN({ doc: kontak })
-      if(app.checkDateA(kontak.Tanggal)) {
-        //check if kontak exist
-        if( !listDaft.filter( e => e === kontak.No_JKN ).length ){
-          let peserta 
-          if(kontak.aktif || kontak.ketAktif){
-            peserta = kontak
-          } else {
-            let pstJKN = await app.getPesertaByNoka({
-              noka: kontak.No_JKN
-            })
-            kontak = Object.assign({}, kontak, pstJKN)
-            peserta = await app.upsertKontakJKN({ doc: kontak })
-          }
-    
-          if(peserta && !peserta.daftResponse && peserta.aktif /* &&  peserta.kdProviderPst.kdProvider.trim() === app.config.PROVIDER*/ ){
+      if( !listDaft.filter( e => e === kontak.No_JKN ).length ){
+        let peserta 
+        if(kontak.aktif || kontak.ketAktif){
+          peserta = kontak
+        } else {
+          let pstJKN = await app.getPesertaByNoka({
+            noka: kontak.No_JKN
+          })
+          kontak = Object.assign({}, kontak, pstJKN)
+          peserta = await app.upsertKontakJKN({ doc: kontak })
+        }
 
-            // check if kontak not registered yet
-            let historyCheck = (await app.getRiwayatKunjungan({ peserta })).filter( ({ tglKunjungan }) => app.checkDate( tglKunjungan, kontak.Tanggal))
+        if(peserta && !peserta.daftResponse && peserta.aktif /* &&  peserta.kdProviderPst.kdProvider.trim() === app.config.PROVIDER*/ ){
 
-            if(!historyCheck.length){
-    
-              let message = await app.sendToWS({kontak: peserta})
+          // check if kontak not registered yet
+          let historyCheck = (await app.getRiwayatKunjungan({ peserta })).filter( ({ tglKunjungan }) => app.checkDate( tglKunjungan, kontak.Tanggal))
 
-              message = await app.upsertKontakJKN({ doc: message })
+          if(!historyCheck.length){
+  
+            let message = await app.sendToWS({kontak: peserta})
 
-              if(!message.from && message.daftResponse && !JSON.stringify(message.daftResponse).includes('sudah di-entri')) {
+            message = await app.upsertKontakJKN({ doc: message })
 
-                let textwa = await app.sendToWA({
-                  message
-                })
+            if(!message.from && message.daftResponse && JSON.stringify(message.daftResponse).includes('CREATED')) {
 
-                await app.upsertKontakJKN({ doc: textwa })
+              let textwa = await app.sendToWA({
+                message
+              })
 
-              }
-    
+              message = await app.upsertKontakJKN({ doc: textwa })
+
             }
-      
+  
+            // console.log(message)
           }
     
         }
+  
       }
-
 
     }
 
