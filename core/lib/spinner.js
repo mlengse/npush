@@ -1,4 +1,8 @@
 const ora = require('ora')
+
+console.log(process.platform === 'win32' && !process.env.NODE_APP_INSTANCE)
+console.log(process.platform === 'win32')
+console.log(!process.env.NODE_APP_INSTANCE)
 exports.spinner =(process.platform === 'win32' && !process.env.NODE_APP_INSTANCE) ? ora({
   stream: process.stdout
 }): {
