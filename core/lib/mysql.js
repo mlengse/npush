@@ -26,9 +26,8 @@ exports._connect = async ({ that , query }) => {
       user: that.config.MYSQL_USER,
       database: that.config.MYSQL_DATABASE
     });
-  } else {
-    return []
-  }
+  } 
+  if(!that.connection) return []
   that.spinner.start(`query: ${query}`)
   if(query.toLowerCase().includes('undefined')) {
     that.spinner.succeed(`query: ${query}`)
