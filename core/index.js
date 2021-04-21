@@ -33,6 +33,8 @@ module.exports = class Core {
     let settings = await this.getSettings()
     let dokter = await this.getDokters()
 
+    console.log(dokter)
+
     if(settings.length){
       this.config = Object.assign({}, this.config, {
         CONSPWD: settings[0].cons_pass,
