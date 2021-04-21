@@ -33,6 +33,7 @@ module.exports = class Core {
     let settings = await this.getSettings()
     let dokter = await this.getDokters()
 
+    console.log(settings)
     console.log(dokter)
 
     if(settings.length){
