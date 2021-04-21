@@ -11,7 +11,7 @@ exports.checkDateA = ( a ) =>  a === moment().format('M/DD/YYYY')
 exports.checkDateC = ( a ) =>  a === moment().add(-1, 'day').format('M/DD/YYYY')
 exports.checkDate = ( a, b ) => moment(a, 'DD-MM-YYYY').format('M/DD/YYYY') === b
 exports.xTimestamp = () => moment.utc().format('X')
-exports.tgl = () => moment(baseDate, 'DD-MM-YYYY').add(-1, 'd').date()
+exports.tgl = () => moment(baseDate, 'DD-MM-YYYY').date()
 exports.blnThn = () => moment(baseDate, 'DD-MM-YYYY').add(-1, 'd').format('MM-YYYY')
 exports.tglHariIni = () => `${this.tgl()}-${this.blnThn()}`
 exports.tglKemarin = () => moment().add(-1, 'day').format('DD-MM-YYYY')
