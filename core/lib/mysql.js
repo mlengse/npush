@@ -17,7 +17,7 @@ exports._poolClose = async ({ that }) => {
 }
 
 exports._connect = async ({ that , query }) => {
-  if(!that.connection){
+  if(!that.connection && process.env.MYSQL_USER){
     // connection  = mysql.createPool({
     that.connection  = mysql.createConnection({
       // connectionLimit : 500,
@@ -26,6 +26,8 @@ exports._connect = async ({ that , query }) => {
       user: that.config.MYSQL_USER,
       database: that.config.MYSQL_DATABASE
     });
+  } else {
+    return []
   }
   that.spinner.start(`query: ${query}`)
   if(query.toLowerCase().includes('undefined')) {

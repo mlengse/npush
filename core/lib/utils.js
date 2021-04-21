@@ -38,3 +38,4 @@ exports.getRR = () => {
 exports.getHR = () => {
   return this.getRandomInt( 90, 98)
 }
+

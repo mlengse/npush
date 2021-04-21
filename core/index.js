@@ -33,19 +33,23 @@ module.exports = class Core {
     let settings = await this.getSettings()
     let dokter = await this.getDokters()
 
-    this.config = Object.assign({}, this.config, {
-      CONSPWD: settings[0].cons_pass,
-      XCONSID: settings[0].cons_user,
-      PCAREUSR: settings[0].pcare_user,
-      PCAREPWD: settings[0].pcare_pass,
-      KDDOKTER: this.config.KDDOKTER || dokter[0].kdDokter
-    })
-
-    if(this.config.PCAREUSR.includes('-')){
-      this.config.PROVIDER = this.config.PCAREUSR.split('-')[1]
-    } else {
-      this.config.PROVIDER = this.config.PCAREUSR
+    if(settings.length){
+      this.config = Object.assign({}, this.config, {
+        CONSPWD: settings[0].cons_pass,
+        XCONSID: settings[0].cons_user,
+        PCAREUSR: settings[0].pcare_user,
+        PCAREPWD: settings[0].pcare_pass,
+        KDDOKTER: this.config.KDDOKTER || dokter[0].kdDokter
+      })
+  
+      if(this.config.PCAREUSR.includes('-')){
+        this.config.PROVIDER = this.config.PCAREUSR.split('-')[1]
+      } else {
+        this.config.PROVIDER = this.config.PCAREUSR
+      }
+  
     }
+
 
     // this.getTgl()
     // this.getUser()
