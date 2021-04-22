@@ -13,7 +13,6 @@ exports._upsertKontakJKN = async ({ that, doc }) => {
 exports._sendToWA = async ({ that, message, push }) => {
   let text, from, errText
 
-
   text = `Terima kasih atas kepercayaan Bpk/Ibu ${message.nama} terhadap pelayanan Puskesmas ${process.env.PUSKESMAS}.`
 
   if(message.daftResponse){
@@ -22,7 +21,7 @@ exports._sendToWA = async ({ that, message, push }) => {
     }
 
     if(push){
-      text = `Yth Bpk/Ibu ${message.nama},\nkami dari Puskesmas ${process.env.PUSKESMAS} menginformasikan, untuk pencegahan penyebaran Covid-19, tetap lakukan 3M Plus: \nMemakai masker dengan benar \nMenjaga jarak \nMencuci tangan dengan sabun dan air mengalir \nPlus menjaga pola hidup bersih dan sehat. `
+      text = `Ke Pasar Baru membeli limun,\njalannya ke atas lewat tangga.\nHindari buka puasa dengan berkerumun,\nlebih afdhal di rumah dengan keluarga.\n\nYth Bpk/Ibu ${message.nama},\nkami dari Puskesmas ${process.env.PUSKESMAS} menginformasikan, untuk pencegahan penyebaran Covid-19, tetap lakukan 3M Plus: \n*) Memakai masker dengan benar \n*) Menjaga jarak \n*) Mencuci tangan dengan sabun dan air mengalir \n*) Plus menjaga pola hidup bersih dan sehat. `
     }
 
     let { response } = message.daftResponse

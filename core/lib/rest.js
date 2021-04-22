@@ -437,10 +437,10 @@ exports._getPesertaInput = async({
       randomListSkt = []
     }
 
-    that.spinner.succeed(`random list sehat ready: ${randomListSht.length}`)
-    that.spinner.succeed(`random list dm ready: ${randomListDM.length}`)
-    that.spinner.succeed(`random list ht ready: ${randomListHT.length}`)
-    that.spinner.succeed(`random list sakit ready: ${randomListSkt.length}`)
+    randomListSht.length && that.spinner.succeed(`random list sehat ready: ${randomListSht.length}`)
+    process.env.RPPT && randomListDM.length && that.spinner.succeed(`random list dm ready: ${randomListDM.length}`)
+    process.env.RPPT && randomListHT.length && that.spinner.succeed(`random list ht ready: ${randomListHT.length}`)
+    process.env.KUNJ_SAKIT && randomListSkt.length && that.spinner.succeed(`random list sakit ready: ${randomListSkt.length}`)
     that.randomList = [
       ...randomListSht.map( no => ({
         no,

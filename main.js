@@ -224,79 +224,82 @@ module.exports = async (isPM2) => {
       }
     }
 
-    // if(app.randomList && app.randomList.length) {
+    if(app.randomList && app.randomList.length) {
 
-    //   //inp kunj
-    //   let detailList = app.randomList.map( ({no, ket}) => ({
-    //     ket,
-    //     det: {
-    //       "kdProviderPeserta": app.config.PROVIDER,
-    //       "tglDaftar": app.tglDaftarA(`${app.getRandomInt(app.tgl() > 4 ? app.tgl()-4  : 1, app.tgl())}-${app.blnThn()}`),
-    //       "noKartu": no,
-    //       "kdPoli": ket === 'sht' ? '021' : '001',
-    //       "keluhan": null,
-    //       "kunjSakit": ket === 'sht' ? false : true,
-    //       "sistole": 0,
-    //       "diastole": 0,
-    //       "beratBadan": 0,
-    //       "tinggiBadan": 0,
-    //       "respRate": 0,
-    //       "heartRate": 0,
-    //       "rujukBalik": 0,
-    //       "kdTkp": ket === 'sht' ? '50' : '10'
-    //     }
-    //   }))
+      //inp kunj
+      let detailList = app.randomList.map( ({no, ket}) => ({
+        ket,
+        det: {
+          "kdProviderPeserta": app.config.PROVIDER,
+          "tglDaftar": app.tglDaftarA(`${app.getRandomInt(app.tgl() > 4 ? app.tgl()-4  : 1, app.tgl())}-${app.blnThn()}`),
+          "noKartu": no,
+          "kdPoli": ket === 'sht' ? '021' : '001',
+          "keluhan": null,
+          "kunjSakit": ket === 'sht' ? false : true,
+          "sistole": 0,
+          "diastole": 0,
+          "beratBadan": 0,
+          "tinggiBadan": 0,
+          "respRate": 0,
+          "heartRate": 0,
+          "rujukBalik": 0,
+          "kdTkp": ket === 'sht' ? '50' : '10'
+        }
+      }))
 
-    //   let noT = 0
-    //   for(let pendaftaran of detailList) {
-    //     noT++
-    //     app.spinner.succeed(`${noT}: ${pendaftaran.det.noKartu}`)
-    //     // app.spinner.succeed(`${kunjIni.indexOf(pendaftaran.det.noKartu)}, ${pendaftaran.det.noKartu}`)
+      let noT = 0
+      for(let pendaftaran of detailList) {
+        noT++
+        app.spinner.succeed(`${noT}: ${pendaftaran.det.noKartu}`)
+        // app.spinner.succeed(`${kunjIni.indexOf(pendaftaran.det.noKartu)}, ${pendaftaran.det.noKartu}`)
 
-    //     app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
-    //     let daftResponse, kunjResponse, mcuResponse 
+        app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
+        let daftResponse, kunjResponse, mcuResponse 
         
-    //     daftResponse = await app.addPendaftaran({
-    //       pendaftaran: pendaftaran.det
-    //     })
-    //     if(daftResponse) app.spinner.succeed(JSON.stringify(daftResponse))
+        daftResponse = await app.addPendaftaran({
+          pendaftaran: pendaftaran.det
+        })
+        if(daftResponse) app.spinner.succeed(JSON.stringify(daftResponse))
 
-    //     if(pendaftaran.det.kunjSakit) {
-    //       //add kunj
-    //       kunjResponse = await app.sendKunj({ daft: pendaftaran })
-    //       if(kunjResponse) {
-    //         app.spinner.succeed(JSON.stringify(kunjResponse))
-    //         if(kunjResponse && kunjResponse.response && kunjResponse.response.message && (pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht')){
-    //           // add mcu
+        if(pendaftaran.det.kunjSakit) {
+          //add kunj
+          kunjResponse = await app.sendKunj({ daft: pendaftaran })
+          if(kunjResponse) {
+            app.spinner.succeed(JSON.stringify(kunjResponse))
+            if(kunjResponse && kunjResponse.response && kunjResponse.response.message && (pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht')){
+              // add mcu
 
-    //     //-------------------------------------------------------------------------
+        //-------------------------------------------------------------------------
 
-    //           mcuResponse = await app.sendMCU({
-    //             daft: pendaftaran,
-    //             noKunjungan:kunjResponse.response.message 
-    //           })
-    //           if(mcuResponse) app.spinner.succeed(JSON.stringify(mcuResponse))
+              mcuResponse = await app.sendMCU({
+                daft: pendaftaran,
+                noKunjungan:kunjResponse.response.message 
+              })
+              if(mcuResponse) app.spinner.succeed(JSON.stringify(mcuResponse))
       
-    //     //-------------------------------------------------------------------------
-    //         }
-    //       }
+        //-------------------------------------------------------------------------
+            }
+          }
 
-    //     }
+        }
 
-    //     let sendText = await app.sendToWA({
-    //       push: true,
-    //       message: JSON.parse(JSON.stringify({
-    //         pendaftaran,
-    //         daftResponse,
-    //         kunjResponse,
-    //         mcuResponse
-    //       }))
-    //     })
+        if(process.env.REDIS_HOST){
+          let sendText = await app.sendToWA({
+            push: true,
+            message: JSON.parse(JSON.stringify({
+              pendaftaran,
+              daftResponse,
+              kunjResponse,
+              mcuResponse
+            }))
+          })
 
-    //     await app.upsertKontakJKN({doc: sendText})
-    //   }
+          process.env.ARANGO_DB && await app.upsertKontakJKN({doc: sendText})
+  
+        }
+      }
 
-    // }
+    }
 
 
     await app.close(isPM2)
