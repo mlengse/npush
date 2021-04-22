@@ -184,13 +184,13 @@ module.exports = async (isPM2) => {
 
         // const listAll = await app.getPeserta()
 
-        if(!that.config.RPPT){
+        if(!process.env.RPPT){
           inputSakit = inputSakit + inputHT + inputDM
           inputHT = 0
           inputDM = 0
         }
     
-        if(!that.config.KUNJ_SAKIT){
+        if(!process.env.KUNJ_SAKIT){
           inputSakit = 0
         }
 
