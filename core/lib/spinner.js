@@ -7,10 +7,10 @@ exports.spinner =(!process.env.NODE_APP_INSTANCE) ? ora({
   stream: process.stdout
 }): {
   start: text => {
-    if(textS !== text) {
-      textS = text
-      console.log(`start: ${text}`)
-    }
+    // if(textS !== text) {
+    //   textS = text
+    //   console.log(`start: ${text}`)
+    // }
   },
   stop: _ => '',
   succeed: text => console.log(`done: ${text}`),
