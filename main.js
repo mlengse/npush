@@ -150,9 +150,9 @@ module.exports = async (isPM2) => {
     }
 
     let kekurangan = 0
-    if (uniqKartu.length/app.config.JML < 0.1756) {
+    if (uniqKartu.length/app.config.JML < 0.1556) {
       //handle angka kontak
-      kekurangan = Math.floor((app.config.JML*0.1756) - uniqKartu.length)
+      kekurangan = Math.floor((app.config.JML*0.1556) - uniqKartu.length)
     }
 
     // if(kekurangan ){
