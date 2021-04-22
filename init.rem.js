@@ -1,12 +1,12 @@
 const start = require('./start')
 const main = require('./rem.js')
-
-module.exports = (isPM2) => {
-  if(process.platform !== 'win32') {
+const { isPuppeteer } = require('./npmls')
+module.exports = async (isPM2) => {
+  let puppet = await isPuppeteer()
+  // console.log(puppeteer)
+  if(process.platform !== 'win32' && puppet) {
     start('runner')
   } else {
-    ;(async() => {
-      await main(isPM2)
-    })()
+    await main(isPM2)
   }
 }

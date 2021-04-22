@@ -13,7 +13,7 @@ schedule(`${menit} ${jamPagi},${jamSore} * * *`, ()=>{
 	init(true)
 })
 
-schedule(`${Math.floor(menit*3/5)} 8-17 * * 1-6`, ()=>{
+process.env.SHEET_ID && schedule(`${Math.floor(menit*3/5)} 8-17 * * 1-6`, ()=>{
 	console.log(`running scheduled appsheet: ${new Date()}`)
 	initRem(true)
 })

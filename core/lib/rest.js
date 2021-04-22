@@ -281,7 +281,7 @@ exports._getPendaftaranProvider = async({
       }
     } while (listAll.length < countAll);
 
-    that.spinner.start(`pendaftaran tgl ${tanggal}: ${listAll.length}`)
+    listAll.length && that.spinner.succeed(`pendaftaran tgl ${tanggal}: ${listAll.length}`)
 
     return listAll;
         
@@ -347,6 +347,7 @@ exports._getPesertaInput = async({
         } = kart
         if(that.cekPstSudah.indexOf(noka) === -1 && uniqKartu.indexOf(noka) === -1) {
           that.cekPstSudah.push(noka)
+ 
           if(tinggiBadan === 0 || beratBadan === 0){
             let riws = await that.getRiwayatKunjungan({
               peserta: {
@@ -354,24 +355,33 @@ exports._getPesertaInput = async({
               }
             })
   
-            if(riws && riws.length) for(let riw of riws){
-              if(riw.beratBadan && riw.tinggiBadan){
-                tinggiBadan = riw.tinggiBadan
-                beratBadan = riw.beratBadan
-                break
-              }
-            }
-  
-            // console.log(riws)
+            // let bb = 0
+            // let tb = 0
+            // if(riws && riws.length) for(let riw of riws){
+            //   if(riw.tinggiBadan > 0 ) {
+            //     tb = riw.tinggiBadan
+            //   }
+            //   if(riw.beratBadan > 0) {
+            //     bb = riw.beratBadan
+            //   }
+            //   if(bb && tb) {
+            //     if(!that.dataBBTB){
+            //       that.dataBBTB = []
+            //     }
+            //     that.dataBBTB.push({
+            //       noKartu: riw.peserta.noKartu,
+            //       tinggiBadan: tb,
+            //       beratBadan: bb
+            //     })
+            //     if(!that.cekPstSudah){
+            //       that.cekPstSudah = []
+            //     }
+            //     that.cekPstSudah.push(riw.peserta.noKartu)
+            //     break
+            //   }
+            // }
           }
-          if(tinggiBadan && beratBadan){
-            that.dataBBTB.push({
-              noKartu: noka,
-              tinggiBadan,
-              beratBadan
-            })
-    
-          }
+
           if(
             randomListSkt.indexOf(noka) === -1 ||
             randomListHT.indexOf(noka) === -1 ||
@@ -503,29 +513,33 @@ exports._getRiwayatKunjungan = async ({that, peserta}) => {
 
     if(res && res.data && res.data.response && res.data.response.list.length){
       let riws = res.data.response.list
+      let bb = 0
+      let tb = 0
       if(riws && riws.length) for(let riw of riws){
-        if(riw.beratBadan && riw.tinggiBadan){
-          if(riw.tinggiBadan && riw.beratBadan){
-            if(!that.dataBBTB){
-              that.dataBBTB = []
-            }
-            that.dataBBTB.push({
-              noKartu: riw.peserta.noKartu,
-              tinggiBadan: riw.tinggiBadan,
-              beratBadan: riw.beratBadan
-            })
-            if(!that.cekPstSudah){
-              that.cekPstSudah = []
-            }
-            that.cekPstSudah.push(riw.peserta.noKartu)
+        if(riw.tinggiBadan > 0 ) {
+          tb = riw.tinggiBadan
+        }
+        if(riw.beratBadan > 0) {
+          bb = riw.beratBadan
+        }
+        if(bb && tb) {
+          if(!that.dataBBTB){
+            that.dataBBTB = []
           }
+          that.dataBBTB.push({
+            noKartu: riw.peserta.noKartu,
+            tinggiBadan: tb,
+            beratBadan: bb
+          })
+          if(!that.cekPstSudah){
+            that.cekPstSudah = []
+          }
+          that.cekPstSudah.push(riw.peserta.noKartu)
 
           break
         }
+        return res.data.response.list
       }
-
-
-      return res.data.response.list
     }
     return []
 
