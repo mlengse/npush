@@ -228,12 +228,11 @@ module.exports = async (isPM2) => {
 
       //inp kunj
 
-      let tglDaftarA = app.tglDaftarA(`${app.getRandomInt(app.tgl() > 4 ? app.tgl()-4  : 1, app.tgl())}-${app.blnThn()}`)
       let detailList = app.randomList.map( ({no, ket}) => ({
         ket,
         det: {
           "kdProviderPeserta": app.config.PROVIDER,
-          "tglDaftar": tglDaftarA,
+          "tglDaftar": app.tglDaftarA(`${app.getRandomInt(app.tgl() > 4 ? app.tgl()-4  : 1, app.tgl())}-${app.blnThn()}`),
           "noKartu": no,
           "kdPoli": ket === 'sht' ? '021' : '001',
           "keluhan": null,
@@ -252,7 +251,7 @@ module.exports = async (isPM2) => {
       let noT = 0
       for(let pendaftaran of detailList) {
         noT++
-        app.spinner.succeed(`${noT}: ${tglDaftarA} | ${pendaftaran.det.noKartu}`)
+        app.spinner.succeed(`${noT}: ${pendaftaran.det.tglDaftar} | ${pendaftaran.det.noKartu}`)
         // app.spinner.succeed(`${kunjIni.indexOf(pendaftaran.det.noKartu)}, ${pendaftaran.det.noKartu}`)
 
         app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
