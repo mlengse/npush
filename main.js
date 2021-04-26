@@ -51,7 +51,8 @@ module.exports = async (isPM2) => {
       //hitung jml rujukan
       if(kunjSakitUnique.indexOf(peserta.noKartu) === -1){
         let res = await app.getRiwayatKunjungan({ 
-          peserta
+          peserta,
+          bln: app.blnThn()
         })
         kunjSakitUnique.push(peserta.noKartu)
 
@@ -60,15 +61,38 @@ module.exports = async (isPM2) => {
           blnThn.shift()
           blnThn = blnThn.join('-')
           if(blnThn === app.blnThn()) {
-            if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10' || re.sistole > 129 || re.diastole > 89) ){
+            if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10') ){
               isHT = true
               if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
-                let peserta =  await app.getPesertaByNoka({
-                  noka: re.peserta.noKartu
-                })
-                if(peserta.pstProl.includes('HT')){
+                if(re.progProlanis.nmProgram && re.progProlanis.nmProgram.includes('HT')){
                   isHTControlled = true
-                }
+                } else {
+                  let peserta
+                  
+                  app.config.ARANGODB_DB ? peserta = await app.arangoQuery({
+                    aq: `FOR p IN pesertaJKN
+                    FILTER p._key == "${re.peserta.noKartu}"
+                    RETURN p`
+                  }): null
+
+                  if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
+                    isHTControlled = true
+                  } else {
+                    peserta = await app.getPesertaByNoka({
+                      noka: re.peserta.noKartu
+                    })
+                    app.config.ARANGODB_DB && await app.arangoUpsert({
+                      coll: 'pesertaJKN',
+                      doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
+                        _key: re.peserta.noKartu,
+                      })
+                    })
+                    if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
+                      isHTControlled = true
+                    }
+    
+                  }
+                } 
               }
             }
 
@@ -79,14 +103,34 @@ module.exports = async (isPM2) => {
               let mcu = await app.getMCU({
                 noKunjungan: re.noKunjungan
               })
-              // console.log(mcu)
               if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
-                if(mc.gulaDarahPuasa < 130 ) {
-                  let peserta =  await app.getPesertaByNoka({
-                    noka: re.peserta.noKartu
-                  })
-                  if(peserta.pstProl.includes('DM')){
+                if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
+                  if(re.progProlanis.nmProgram && re.progProlanis.nmProgram.includes('DM')){
                     isDMControlled = true
+                  } else {
+                    let peserta
+                    app.config.ARANGODB_DB ? peserta = await app.arangoQuery({
+                      aq: `FOR p IN pesertaJKN
+                      FILTER p._key == "${re.peserta.noKartu}"
+                      RETURN p`
+                    }): null
+  
+                    if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
+                      isDMControlled = true
+                    } else {
+                      peserta =  await app.getPesertaByNoka({
+                        noka: re.peserta.noKartu
+                      })
+                      app.config.ARANGODB_DB && await app.arangoUpsert({
+                        coll: 'pesertaJKN',
+                        doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
+                          _key: re.peserta.noKartu,
+                        })
+                      })
+                      if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
+                        isDMControlled = true
+                      }
+                    }
                   }
                 }
               }
@@ -126,6 +170,7 @@ module.exports = async (isPM2) => {
         inputHT++
         htNum++
       }
+      // app.spinner.succeed(`HT Prolanis terkendali: ${kunjHT.length} dari kunj HT: ${htAll} atau: ${Math.floor(1000*kunjHT.length/htAll)/10} %`)
     }
 
     let inputDM = 0
@@ -138,6 +183,7 @@ module.exports = async (isPM2) => {
         inputDM++
         dmNum++
       }
+      // app.spinner.succeed(`DM Prolanis terkendali: ${kunjDM.length} dari kunj DM: ${dmAll} atau: ${Math.floor(1000*kunjDM.length/dmAll)/10} %`)
     }
 
     let inputSakit = inputHT + inputDM
@@ -147,6 +193,7 @@ module.exports = async (isPM2) => {
         kunjSakit++
         inputSakit++
       }
+      // app.spinner.succeed(`rujukan: ${rujukan} dari kunj sakit: ${app.kunjSakitBlnIni.length} atau: ${Math.floor(1000*rujukan/app.kunjSakitBlnIni.length)/10} %`)
     }
 
     let kekurangan = 0
@@ -172,25 +219,13 @@ module.exports = async (isPM2) => {
         }
         app.spinner.succeed(`akan diinput: ${akanDiinput}`)
 
-
-
-        // cek mulai dari sini ya...
-        // if(inputSakit > 50){
-        //   inputSakit = 50
-        // }
-        // if(akanDiinput > 1000){
-        //   akanDiinput = 1000
-        // }
-
-        // const listAll = await app.getPeserta()
-
-        if(!process.env.RPPT){
+        if(!app.config.RPPT){
           inputSakit = inputSakit + inputHT + inputDM
           inputHT = 0
           inputDM = 0
         }
     
-        if(!process.env.KUNJ_SAKIT){
+        if(!app.config.KUNJ_SAKIT){
           inputSakit = 0
         }
 
@@ -284,7 +319,7 @@ module.exports = async (isPM2) => {
 
         }
 
-        if(process.env.REDIS_HOST){
+        if(app.config.REDIS_HOST){
           let sendText = await app.sendToWA({
             push: true,
             message: JSON.parse(JSON.stringify({
@@ -295,7 +330,7 @@ module.exports = async (isPM2) => {
             }))
           })
 
-          process.env.ARANGO_DB && await app.upsertKontakJKN({doc: sendText})
+          app.config.ARANGODB_DB && await app.upsertKontakJKN({doc: sendText})
   
         }
       }

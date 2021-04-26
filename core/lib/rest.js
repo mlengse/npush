@@ -98,28 +98,53 @@ exports._getMCU = async({
   that,
   noKunjungan
 }) => {
+  that.spinner.start(`get MCU by no kunj: ${noKunjungan}`)
   try{
-    const { headers } = await that.getArgs()
 
-    that.spinner.start(`get MCU by no kunj: ${noKunjungan}`)
+    let mcu
+    if(that.config.ARANGODB_DB) {
+      let mcuDB = await that.arangoQuery({
+        aq: `FOR m in mcu
+        FILTER m._key == "${noKunjungan}"
+        RETURN m`
+      })
 
-    const baseURL = `${that.config.APIV3}`
-  
-    const instance = axios.create({
-      baseURL,
-      headers
-    })
-
-    let res = await instance.get(`/mcu/kunjungan/${noKunjungan}`)
-    if(res && res.data && res.data.response ){
-      return res.data.response
+      if(mcuDB.length) {
+        mcu = mcuDB
+      }
     }
 
-  }catch({
-    response
-  }){
-    return response
+    if(!mcu || (mcu && !mcu.length)){
+      const { headers } = await that.getArgs()
+
+      const baseURL = `${that.config.APIV3}`
+    
+      const instance = axios.create({
+        baseURL,
+        headers
+      })
+  
+      let res = await instance.get(`/mcu/kunjungan/${noKunjungan}`)
+      if(res && res.data && res.data.response && res.data.response.count ){
+        await that.arangoUpsert({
+          coll: 'mcu',
+          doc: Object.assign({}, res.data.response, {
+            _key: noKunjungan,
+          })
+        })
+        mcu = res.data.response
+      }
+  
+    }
+
+    // console.log(mcu)
+
+    return mcu
+  }catch(e){
+    // console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+    return null
   }
+
 
 }
 
@@ -233,60 +258,94 @@ exports._getPendaftaranProvider = async({
   }
 
   try{
-    that.spinner.start(`get pendaftaran tgl ${tanggal}`)
-    const args = await that.getArgs()
-
-    // that.spinner.start(args)
-
-    const client = new Client()
     let listAll = []
     let countAll = 1
-    do {
-      let start = listAll.length
-      let apiURL = `${that.config.APIV3}/pendaftaran/tglDaftar/${tanggal}/${start}/300`
 
-      // that.spinner.start(`url: ${apiURL}`)
-  
-      let {
-        response,
-        metadata
-      } = await new Promise((resolve, reject) =>  {
-        let req = client.get(apiURL, args, data => resolve(data) )
-        req.on('requestTimeout', function (req) {
-          reject('request has expired');
-          req.abort();
-        });
-        
-        req.on('responseTimeout', function (res) {
-          reject('response has expired');
-        });
-        
-        //it's usefull to handle request errors to avoid, for example, socket hang up errors on request timeouts
-        req.on('error', function (err) {
-          reject(err);
-        });
-      });
-      // console.log(metadata)
-      // let response = a.response
-      if (response) {
-        // console.log(response)
-        if (response.count) {
-          countAll = response.count;
-        } 
-        if (response.list && response.list.length) {
-          listAll = [...listAll, ...response.list];
-        }
-      } else {
-        countAll = 0
+    if(that.config.ARANGODB_DB && !tanggal.includes(that.blnThn())) {
+      let daftDB = await that.arangoQuery({
+        aq: `FOR d in pendaftaran-JKN
+        FILTER d._key == "${tanggal}"
+        RETURN d`
+      })
+
+      if(daftDB.length) {
+        listAll = daftDB[0].list
+        countAll = daftDB[0].jumlah
       }
-    } while (listAll.length < countAll);
+    }
+
+    if(!listAll.length){
+      that.spinner.start(`get pendaftaran tgl ${tanggal}`)
+      const args = await that.getArgs()
+  
+      // that.spinner.start(args)
+  
+      const client = new Client()
+      do {
+        let start = listAll.length
+        let apiURL = `${that.config.APIV3}/pendaftaran/tglDaftar/${tanggal}/${start}/300`
+  
+        // that.spinner.start(`url: ${apiURL}`)
+    
+        let {
+          response,
+          metadata
+        } = await new Promise((resolve, reject) =>  {
+          let req = client.get(apiURL, args, data => resolve(data) )
+          req.on('requestTimeout', function (req) {
+            reject('request has expired');
+            req.abort();
+          });
+          
+          req.on('responseTimeout', function (res) {
+            reject('response has expired');
+          });
+          
+          //it's usefull to handle request errors to avoid, for example, socket hang up errors on request timeouts
+          req.on('error', function (err) {
+            reject(err);
+          });
+        });
+        // console.log(metadata)
+        // let response = a.response
+        if (response) {
+          // console.log(response)
+          if (response.count) {
+            countAll = response.count;
+          } 
+          if (response.list && response.list.length) {
+            listAll = [...listAll, ...response.list];
+          }
+        } else {
+          countAll = 0
+        }
+      } while (listAll.length < countAll);
+
+      listAll.length && that.config.ARANGODB_DB && await that.arangoUpsert({ coll: 'pendaftaran-JKN', doc: {
+        _key: tanggal,
+        jml: listAll.length,
+        list: listAll
+      }}) 
+      
+      // if(listAll.length) for(let re of listAll) {
+      //   that.config.ARANGODB_DB && await that.arangoUpsert({
+      //     coll: 'pesertaJKN',
+      //     doc: Object.assign({}, re.peserta, re.progProlanis, {
+      //       _key: re.peserta.noKartu,
+      //     })
+      //   })
+
+      // }
+    }
+
+
 
     listAll.length && that.spinner.succeed(`pendaftaran tgl ${tanggal}: ${listAll.length}`)
 
     return listAll;
         
   }catch(e){
-    that.spinner.fail(e)
+    console.error(e)
     return that.getPendaftaranProvider({
       tanggal
     })
@@ -304,23 +363,13 @@ exports._getPesertaInput = async({
 }) => {
 
   try {
-    // let blnThn = that.blnThnGetPst()
-    // let kunjBlnIni = []
     let tanggal = that.tglBlnLalu()
     let randomListSht = []
     let randomListDM = []
     let randomListHT = []
     let randomListSkt = []
 
-    // let cekPstSudah =[]
-
-    // that.dataBBTB = []
-
     let baleni = async () => {
-      // that.spinner.succeed(`random list sehat ready: ${randomListSht.length}`)
-      // that.spinner.succeed(`random list dm ready: ${randomListDM.length}`)
-      // that.spinner.succeed(`random list ht ready: ${randomListHT.length}`)
-      // that.spinner.succeed(`random list sakit ready: ${randomListSkt.length}`)
 
       let kunjHariIni = await that.getPendaftaranProvider({
         tanggal
@@ -354,32 +403,7 @@ exports._getPesertaInput = async({
                 noKartu: noka
               }
             })
-  
-            // let bb = 0
-            // let tb = 0
-            // if(riws && riws.length) for(let riw of riws){
-            //   if(riw.tinggiBadan > 0 ) {
-            //     tb = riw.tinggiBadan
-            //   }
-            //   if(riw.beratBadan > 0) {
-            //     bb = riw.beratBadan
-            //   }
-            //   if(bb && tb) {
-            //     if(!that.dataBBTB){
-            //       that.dataBBTB = []
-            //     }
-            //     that.dataBBTB.push({
-            //       noKartu: riw.peserta.noKartu,
-            //       tinggiBadan: tb,
-            //       beratBadan: bb
-            //     })
-            //     if(!that.cekPstSudah){
-            //       that.cekPstSudah = []
-            //     }
-            //     that.cekPstSudah.push(riw.peserta.noKartu)
-            //     break
-            //   }
-            // }
+
           }
 
           if(
@@ -496,26 +520,48 @@ exports._getPeserta = async({
   }
 }
 
-exports._getRiwayatKunjungan = async ({that, peserta}) => {
+exports._getRiwayatKunjungan = async ({that, peserta, bln}) => {
+  let riws = []
+
   try{
-    const { headers } = await that.getArgs()
-    that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu }`)
 
-    const baseURL = `${that.config.APIV3}`
+    if(that.config.ARANGODB_DB){
+      let kunjDB = await that.arangoQuery({
+        aq: `FOR k IN kunjJKN
+        FILTER k.peserta.noKartu == "${peserta.noKartu}"
+        ${bln? `AND CONTAINS(k.tglKunjungan, "${bln}")` : ''}
+        RETURN k`
+      })
+      kunjDB.length ? riws = kunjDB : null
+    }
+
+    if(!riws.length) {
+      const { headers } = await that.getArgs()
+      const baseURL = `${that.config.APIV3}`
   
-    const instance = axios.create({
-      baseURL,
-      headers
-    })
+      const instance = axios.create({
+        baseURL,
+        headers
+      })
 
-    let res = await instance.get(`/kunjungan/peserta/${peserta.noKartu}`)
-    // that.spinner.succeed()
+      that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu }`)
+      let res = await instance.get(`/kunjungan/peserta/${peserta.noKartu}`)
+      // that.spinner.succeed()
+      if(res && res.data && res.data.response && res.data.response.list.length){
+        riws = res.data.response.list
+        if(riws && riws.length) for(let riw of riws){
+          that.config.ARANGODB_DB && await that.arangoUpsert({
+            coll: 'kunjJKN',
+            doc: riw
+          })        
+        }
+      }
+    }
 
-    if(res && res.data && res.data.response && res.data.response.list.length){
-      let riws = res.data.response.list
-      let bb = 0
-      let tb = 0
-      if(riws && riws.length) for(let riw of riws){
+    let bb = 0
+    let tb = 0
+    if(riws && riws.length) {
+      for(let riw of riws){
         if(riw.tinggiBadan > 0 ) {
           tb = riw.tinggiBadan
         }
@@ -535,13 +581,12 @@ exports._getRiwayatKunjungan = async ({that, peserta}) => {
             that.cekPstSudah = []
           }
           that.cekPstSudah.push(riw.peserta.noKartu)
-
+  
           break
         }
-        return res.data.response.list
       }
     }
-    return []
+    return riws
 
   }catch(e){
     console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
@@ -564,7 +609,10 @@ exports._getPesertaByNoka = async ({ that, noka}) => {
       })
   
       let res = await instance.get(`/peserta/noka/${noka}`)
-      if(res && res.data && res.data.response ){
+      if(res && res.data && res.data.response){
+        if(res.data.response.count){
+          console.log(res.data.response)
+        }
         return res.data.response
       }
       return null
