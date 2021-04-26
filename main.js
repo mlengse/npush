@@ -81,6 +81,7 @@ module.exports = async (isPM2) => {
                     peserta = await app.getPesertaByNoka({
                       noka: re.peserta.noKartu
                     })
+                    // console.log(peserta)
                     app.config.ARANGODB_DB && await app.arangoUpsert({
                       coll: 'pesertaJKN',
                       doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
@@ -121,6 +122,7 @@ module.exports = async (isPM2) => {
                       peserta =  await app.getPesertaByNoka({
                         noka: re.peserta.noKartu
                       })
+                      // console.log(peserta)
                       app.config.ARANGODB_DB && await app.arangoUpsert({
                         coll: 'pesertaJKN',
                         doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
@@ -220,7 +222,6 @@ module.exports = async (isPM2) => {
         app.spinner.succeed(`akan diinput: ${akanDiinput}`)
 
         if(!app.config.RPPT){
-          inputSakit = inputSakit + inputHT + inputDM
           inputHT = 0
           inputDM = 0
         }

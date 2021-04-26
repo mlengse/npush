@@ -261,9 +261,11 @@ exports._getPendaftaranProvider = async({
     let listAll = []
     let countAll = 1
 
-    if(that.config.ARANGODB_DB && !tanggal.includes(that.blnThn())) {
+    let tgl = Number(tanggal.split('-')[0])
+
+    if(that.config.ARANGODB_DB && (!tanggal.includes(that.blnThn()) || ( tanggal.includes(that.blnThn()) && that.tgl() - tgl > 4 ))) {
       let daftDB = await that.arangoQuery({
-        aq: `FOR d in pendaftaran-JKN
+        aq: `FOR d in pendaftaranJKN
         FILTER d._key == "${tanggal}"
         RETURN d`
       })
@@ -321,7 +323,7 @@ exports._getPendaftaranProvider = async({
         }
       } while (listAll.length < countAll);
 
-      listAll.length && that.config.ARANGODB_DB && await that.arangoUpsert({ coll: 'pendaftaran-JKN', doc: {
+      listAll.length && that.config.ARANGODB_DB && await that.arangoUpsert({ coll: 'pendaftaranJKN', doc: {
         _key: tanggal,
         jml: listAll.length,
         list: listAll
@@ -369,7 +371,7 @@ exports._getPesertaInput = async({
     let randomListHT = []
     let randomListSkt = []
 
-    let baleni = async () => {
+    const baleni = async () => {
 
       let kunjHariIni = await that.getPendaftaranProvider({
         tanggal
@@ -398,7 +400,7 @@ exports._getPesertaInput = async({
           that.cekPstSudah.push(noka)
  
           if(tinggiBadan === 0 || beratBadan === 0){
-            let riws = await that.getRiwayatKunjungan({
+            await that.getRiwayatKunjungan({
               peserta: {
                 noKartu: noka
               }
@@ -442,11 +444,8 @@ exports._getPesertaInput = async({
       tanggal = that.tglKmrn(tanggal)
 
     }
-  
-    while((randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit){
-      await baleni()
-    }
-    while((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
+
+    while(randomListDM.length < inputDM || randomListHT.length < inputHT || (randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit || (randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
       await baleni()
     }
 
@@ -610,9 +609,6 @@ exports._getPesertaByNoka = async ({ that, noka}) => {
   
       let res = await instance.get(`/peserta/noka/${noka}`)
       if(res && res.data && res.data.response){
-        if(res.data.response.count){
-          console.log(res.data.response)
-        }
         return res.data.response
       }
       return null
