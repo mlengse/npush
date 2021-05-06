@@ -25,7 +25,7 @@ module.exports = async (isPM2) => {
       tgl--
     }
 
-    app.kunjBlnIni = app.kunjBlnIni.filter( e => !e.kunjSakit || (e.kunjSakit && e.status === 'Sudah dilayani'))
+    app.kunjBlnIni = app.kunjBlnIni.filter( e => !e.kunjSakit || (e.kunjSakit && e.status.includes('dilayani')))
 
     app.spinner.succeed(`kunj total bln ${app.blnThn()}: ${app.kunjBlnIni.length}`)
 
@@ -208,10 +208,9 @@ module.exports = async (isPM2) => {
     if(inputSakit || kekurangan || inputHT || inputDM ){
 
       //get peserta yg akan diinput
-      app.spinner.start(`tgl ${app.now} s.d. ${app.end}`)
       const sisaHari = Number(app.end) - Number(app.now)
       //const sisaHari = moment().to(moment().endOf("month"));
-      app.spinner.succeed(`sisa hari: ${sisaHari}`);
+      app.spinner.succeed(`tgl ${app.now} s.d. ${app.end}; sisa hari: ${sisaHari}`);
       const pembagi = sisaHari - 2
 
       if(pembagi > 0 || kekurangan > 0 || inputSakit || inputHT) {
