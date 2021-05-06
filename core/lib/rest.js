@@ -237,15 +237,14 @@ exports._addPendaftaran = async ({
 
     let res = await instance.post('/pendaftaran', pendaftaran)
 
-    if (res) {
+    if (res && res.data) {
       return res.data
     }
-  } catch ({
-    response: {
-      data
+  } catch (err) {
+    if(err.response && err.response.data){
+      return err.response.data
     }
-  }) {
-    return data
+    console.error(err)
   }
 }
 
