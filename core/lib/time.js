@@ -24,21 +24,21 @@ exports.tglKmrn = tgl  => moment(tgl, 'D-MM-YYYY').clone().add(-1,'d').format('D
 exports.tglDaftarB = b => moment(b, 'M/DD/YYYY').format('DD-MM-YYYY')
 exports.tglPcareFromKontak = tgl => moment(tgl, 'M/D/YYYY').format('DD-MM-YYYY')
 exports.tglDaftarA = (a) => {
-  if(a.split('-')[0] === '1') {
+  if(Number(a.split('-')[0]) < 4) {
     return a
   }
 
   if(moment(a, 'DD-MM-YYYY').day() === 0){
-    if(moment(a, 'DD-MM-YYYY').add(-4, 'd').day() === 0){
-      return moment(a, 'DD-MM-YYYY').add(-3, 'd').format('DD-MM-YYYY')
+    if(moment(a, 'DD-MM-YYYY').add(-3, 'd').day() === 0){
+      return moment(a, 'DD-MM-YYYY').add(-2, 'd').format('DD-MM-YYYY')
     } 
-    return moment(a, 'DD-MM-YYYY').add(-4, 'd').format('DD-MM-YYYY')
+    return moment(a, 'DD-MM-YYYY').add(-3, 'd').format('DD-MM-YYYY')
   } 
 
-  if(moment(a, 'DD-MM-YYYY').add(-3, 'd').day() === 0){
-    return moment(a, 'DD-MM-YYYY').add(-2, 'd').format('DD-MM-YYYY')
+  if(moment(a, 'DD-MM-YYYY').add(-2, 'd').day() === 0){
+    return moment(a, 'DD-MM-YYYY').add(-1, 'd').format('DD-MM-YYYY')
   } 
-  return moment(a, 'DD-MM-YYYY').add(-3, 'd').format('DD-MM-YYYY')
+  return moment(a, 'DD-MM-YYYY').add(-2, 'd').format('DD-MM-YYYY')
 } 
 exports.tglDaftar = () => {
  if(moment(baseDate, 'DD-MM-YYYY').day() === 0){
