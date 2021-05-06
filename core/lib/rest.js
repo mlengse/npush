@@ -367,6 +367,7 @@ exports._getPesertaInput = async ({
 }) => {
 
   try {
+    let count = 0
     let tanggal = that.tglBlnLalu()
     let randomListSht = []
     let randomListDM = []
@@ -444,17 +445,12 @@ exports._getPesertaInput = async ({
         }
       }
       tanggal = that.tglKmrn(tanggal)
+      count++
 
     }
 
-    while ((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput) {
+    while ((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput || randomListDM.length < inputDM || randomListHT.length < inputHT || (randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit) {
       await baleni()
-    }
-
-    if (tanggal > 15) { 
-      while (randomListDM.length < inputDM || randomListHT.length < inputHT || (randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit) { 
-        await baleni() 
-      } 
     }
 
     if (!that.config.RPPT) {
