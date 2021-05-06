@@ -3,7 +3,7 @@ const {
 } = require('node-rest-client')
 const axios = require('axios')
 
-exports._deletePendaftaran = async ({ 
+exports._deletePendaftaran = async ({
   that,
   noKartu,
   tgldaftar,
@@ -14,18 +14,18 @@ exports._deletePendaftaran = async ({
     const {
       headers
     } = await that.getArgs()
-  
+
     const baseURL = `${that.config.APIV3}`
-  
+
     that.spinner.start(`delete pendaftaran ${noKartu} tgl ${tgldaftar} noUrut ${noUrut} kdPoli ${kdPoli}`)
     let data = (await axios.create({
       baseURL,
       headers
     }).delete(`/pendaftaran/peserta/${noKartu}/tglDaftar/${tgldaftar}/noUrut/${noUrut}/kdPoli/${kdPoli}`)).data
-  
+
     return data
 
-  }catch(e){
+  } catch (e) {
     that.spinner.fail(JSON.stringify(e))
     // return data
   }
@@ -75,57 +75,57 @@ exports._sendMCU = async ({ that, noKunjungan, daft }) => {
     const {
       headers
     } = await that.getArgs()
-  
+
     const baseURL = `${that.config.APIV3}`
-  
+
     const instance = axios.create({
       baseURL,
       headers
     })
 
     let res = await instance.post('/mcu', mcu)
-    if(res){
+    if (res) {
       return res.data
     }
 
-  }catch(e){
+  } catch (e) {
     that.spinner.fail(JSON.stringify(e))
     // return data
   }
 }
 
-exports._getMCU = async({
+exports._getMCU = async ({
   that,
   noKunjungan
 }) => {
   that.spinner.start(`get MCU by no kunj: ${noKunjungan}`)
-  try{
+  try {
 
     let mcu
-    if(that.config.ARANGODB_DB) {
+    if (that.config.ARANGODB_DB) {
       let mcuDB = await that.arangoQuery({
         aq: `FOR m in mcu
         FILTER m._key == "${noKunjungan}"
         RETURN m`
       })
 
-      if(mcuDB.length) {
+      if (mcuDB.length) {
         mcu = mcuDB
       }
     }
 
-    if(!mcu || (mcu && !mcu.length)){
+    if (!mcu || (mcu && !mcu.length)) {
       const { headers } = await that.getArgs()
 
       const baseURL = `${that.config.APIV3}`
-    
+
       const instance = axios.create({
         baseURL,
         headers
       })
-  
+
       let res = await instance.get(`/mcu/kunjungan/${noKunjungan}`)
-      if(res && res.data && res.data.response && res.data.response.count ){
+      if (res && res.data && res.data.response && res.data.response.count) {
         await that.arangoUpsert({
           coll: 'mcu',
           doc: Object.assign({}, res.data.response, {
@@ -134,13 +134,13 @@ exports._getMCU = async({
         })
         mcu = res.data.response
       }
-  
+
     }
 
     // console.log(mcu)
 
     return mcu
-  }catch(e){
+  } catch (e) {
     // console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
     return null
   }
@@ -149,20 +149,20 @@ exports._getMCU = async({
 }
 
 
-exports._sendKunj = async ({that, daft}) => {
+exports._sendKunj = async ({ that, daft }) => {
   // console.log(daft)
   let sistole, diastole, kdDiag1, kdDokter
-  if(daft.kontak) {
+  if (daft.kontak) {
     kdDiag1 = kontak.Diagnosis
     kdDokter = kontak.Petugas.split('\t')[0]
-    if(daft.ket === 'ht'){
+    if (daft.ket === 'ht') {
       sistole = kontak.Sistolik
       diastole = kontak.Diastolik
-    } 
+    }
   }
 
-  let bbtb = that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0]
-  if(bbtb && bbtb.beratBadan){
+  let bbtb = that.dataBBTB.filter(({ noKartu }) => noKartu === daft.det.noKartu)[0]
+  if (bbtb && bbtb.beratBadan) {
     that.kunjunganNow = {
       noKunjungan: null,
       noKartu: daft.det.noKartu,
@@ -172,8 +172,8 @@ exports._sendKunj = async ({that, daft}) => {
       kdSadar: "01",
       sistole: sistole || that.getSystole(),
       diastole: diastole || that.getDiastole(),
-      beratBadan: that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0].beratBadan,
-      tinggiBadan: that.dataBBTB.filter( ({ noKartu }) => noKartu === daft.det.noKartu)[0].tinggiBadan,
+      beratBadan: that.dataBBTB.filter(({ noKartu }) => noKartu === daft.det.noKartu)[0].beratBadan,
+      tinggiBadan: that.dataBBTB.filter(({ noKartu }) => noKartu === daft.det.noKartu)[0].tinggiBadan,
       respRate: that.getRR(),
       heartRate: that.getHR(),
       terapi: "",
@@ -190,119 +190,119 @@ exports._sendKunj = async ({that, daft}) => {
     }
 
     // console.log(that.kunjunganNow)
-  
+
     try {
       that.spinner.start(`send kunjungan ${daft.det.noKartu} ${daft.det.tglDaftar}`)
       const {
         headers
       } = await that.getArgs()
-    
+
       const baseURL = `${that.config.APIV3}`
-    
+
       const instance = axios.create({
         baseURL,
         headers
       })
-  
+
       let res = await instance.post('/kunjungan', that.kunjunganNow)
-      if(res){
+      if (res) {
         return res.data
       }
-  
-    }catch(e){
+
+    } catch (e) {
       that.spinner.fail(JSON.stringify(e))
       // return data
     }
-  
+
   }
-  
+
 }
 
 exports._addPendaftaran = async ({
-  that, 
+  that,
   pendaftaran
 }) => {
 
-  try{
+  try {
     const {
       headers
     } = await that.getArgs()
-  
+
     const baseURL = `${that.config.APIV3}`
-  
+
     const instance = axios.create({
       baseURL,
       headers
     })
 
-    let res = await instance.post('/pendaftaran', pendaftaran )
+    let res = await instance.post('/pendaftaran', pendaftaran)
 
-    if(res){
+    if (res) {
       return res.data
     }
-  }catch({
+  } catch ({
     response: {
       data
     }
-  }){
+  }) {
     return data
   }
 }
 
-exports._getPendaftaranProvider = async({
+exports._getPendaftaranProvider = async ({
   that,
   tanggal
 }) => {
-  if(!tanggal){
+  if (!tanggal) {
     tanggal = that.tglHariIni()
   }
 
-  try{
+  try {
     let listAll = []
     let countAll = 1
 
     let tgl = Number(tanggal.split('-')[0])
 
-    if(that.config.ARANGODB_DB && (!tanggal.includes(that.blnThn()) || ( tanggal.includes(that.blnThn()) && that.tgl() - tgl > 4 ))) {
+    if (that.config.ARANGODB_DB && (!tanggal.includes(that.blnThn()) || (tanggal.includes(that.blnThn()) && that.tgl() - tgl > 4))) {
       let daftDB = await that.arangoQuery({
         aq: `FOR d in pendaftaranJKN
         FILTER d._key == "${tanggal}"
         RETURN d`
       })
 
-      if(daftDB.length) {
+      if (daftDB.length) {
         listAll = daftDB[0].list
         countAll = daftDB[0].jumlah
       }
     }
 
-    if(!listAll.length){
+    if (!listAll.length) {
       that.spinner.start(`get pendaftaran tgl ${tanggal}`)
       const args = await that.getArgs()
-  
+
       // that.spinner.start(args)
-  
+
       const client = new Client()
       do {
         let start = listAll.length
         let apiURL = `${that.config.APIV3}/pendaftaran/tglDaftar/${tanggal}/${start}/300`
-  
+
         // that.spinner.start(`url: ${apiURL}`)
-    
+
         let {
           response,
           metadata
-        } = await new Promise((resolve, reject) =>  {
-          let req = client.get(apiURL, args, data => resolve(data) )
+        } = await new Promise((resolve, reject) => {
+          let req = client.get(apiURL, args, data => resolve(data))
           req.on('requestTimeout', function (req) {
             reject('request has expired');
             req.abort();
           });
-          
+
           req.on('responseTimeout', function (res) {
             reject('response has expired');
           });
-          
+
           //it's usefull to handle request errors to avoid, for example, socket hang up errors on request timeouts
           req.on('error', function (err) {
             reject(err);
@@ -314,7 +314,7 @@ exports._getPendaftaranProvider = async({
           // console.log(response)
           if (response.count) {
             countAll = response.count;
-          } 
+          }
           if (response.list && response.list.length) {
             listAll = [...listAll, ...response.list];
           }
@@ -323,12 +323,14 @@ exports._getPendaftaranProvider = async({
         }
       } while (listAll.length < countAll);
 
-      listAll.length && that.config.ARANGODB_DB && await that.arangoUpsert({ coll: 'pendaftaranJKN', doc: {
-        _key: tanggal,
-        jml: listAll.length,
-        list: listAll
-      }}) 
-      
+      listAll.length && that.config.ARANGODB_DB && await that.arangoUpsert({
+        coll: 'pendaftaranJKN', doc: {
+          _key: tanggal,
+          jml: listAll.length,
+          list: listAll
+        }
+      })
+
       // if(listAll.length) for(let re of listAll) {
       //   that.config.ARANGODB_DB && await that.arangoUpsert({
       //     coll: 'pesertaJKN',
@@ -345,8 +347,8 @@ exports._getPendaftaranProvider = async({
     listAll.length && that.spinner.succeed(`pendaftaran tgl ${tanggal}: ${listAll.length}`)
 
     return listAll;
-        
-  }catch(e){
+
+  } catch (e) {
     console.error(e)
     return that.getPendaftaranProvider({
       tanggal
@@ -355,7 +357,7 @@ exports._getPendaftaranProvider = async({
 
 }
 
-exports._getPesertaInput = async({
+exports._getPesertaInput = async ({
   that,
   akanDiinput,
   uniqKartu,
@@ -377,7 +379,7 @@ exports._getPesertaInput = async({
         tanggal
       })
       // console.log(kunjHariIni)
-      let kartuList = kunjHariIni.map( ({
+      let kartuList = kunjHariIni.map(({
         peserta: {
           noKartu,
         },
@@ -387,19 +389,19 @@ exports._getPesertaInput = async({
         noka: noKartu,
         beratBadan,
         tinggiBadan
-      }) )
-  
+      }))
+
       for (kart of kartuList) {
         // console.log(kart)
         let {
-          noka, 
-          beratBadan, 
+          noka,
+          beratBadan,
           tinggiBadan
         } = kart
-        if(that.cekPstSudah.indexOf(noka) === -1 && uniqKartu.indexOf(noka) === -1) {
+        if (that.cekPstSudah.indexOf(noka) === -1 && uniqKartu.indexOf(noka) === -1) {
           that.cekPstSudah.push(noka)
- 
-          if(tinggiBadan === 0 || beratBadan === 0){
+
+          if (tinggiBadan === 0 || beratBadan === 0) {
             await that.getRiwayatKunjungan({
               peserta: {
                 noKartu: noka
@@ -408,7 +410,7 @@ exports._getPesertaInput = async({
 
           }
 
-          if(
+          if (
             randomListSkt.indexOf(noka) === -1 ||
             randomListHT.indexOf(noka) === -1 ||
             randomListDM.indexOf(noka) === -1 ||
@@ -418,26 +420,26 @@ exports._getPesertaInput = async({
             let pst = await that.getPesertaByNoka({
               noka
             })
-  
+
             // console.log(pst)
-            if(pst && pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PROVIDER) {
-              if(pst.pstProl && pst.pstProl !== ''){
-                if(pst.pstProl.includes('HT') && randomListHT.length < inputHT){
+            if (pst && pst.aktif && pst.kdProviderPst.kdProvider.trim() === that.config.PROVIDER) {
+              if (pst.pstProl && pst.pstProl !== '') {
+                if (pst.pstProl.includes('HT') && randomListHT.length < inputHT) {
                   randomListHT.push(pst.noKartu)
                 }
-                if(pst.pstProl.includes('DM') && randomListDM.length < inputDM){
+                if (pst.pstProl.includes('DM') && randomListDM.length < inputDM) {
                   randomListDM.push(pst.noKartu)
                 }
               } else {
-                if((randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit){
+                if ((randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit) {
                   randomListSkt.push(pst.noKartu)
-                } else if((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
+                } else if ((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput) {
                   randomListSht.push(pst.noKartu)
                 }
               }
-  
+
             }
-  
+
           }
         }
       }
@@ -445,18 +447,24 @@ exports._getPesertaInput = async({
 
     }
 
-    while(randomListDM.length < inputDM || randomListHT.length < inputHT || (randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit || (randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput){
+    while ((randomListSht.length + randomListDM.length + randomListHT.length + randomListSkt.length) < akanDiinput) {
       await baleni()
     }
 
-    if(!that.config.RPPT){
-      randomListSkt = [ ...randomListSkt, ...randomListDM, ...randomListHT]
+    if (tanggal > 15) { 
+      while (randomListDM.length < inputDM || randomListHT.length < inputHT || (randomListHT.length + randomListDM.length + randomListSkt.length) < inputSakit) { 
+        await baleni() 
+      } 
+    }
+
+    if (!that.config.RPPT) {
+      randomListSkt = [...randomListSkt, ...randomListDM, ...randomListHT]
       randomListDM = []
       randomListHT = []
     }
 
-    if(!that.config.KUNJ_SAKIT){
-      randomListSht = [ ...randomListSkt, ...randomListSht]
+    if (!that.config.KUNJ_SAKIT) {
+      randomListSht = [...randomListSkt, ...randomListSht]
       randomListSkt = []
     }
 
@@ -465,30 +473,30 @@ exports._getPesertaInput = async({
     process.env.RPPT && randomListHT.length && that.spinner.succeed(`random list ht ready: ${randomListHT.length}`)
     process.env.KUNJ_SAKIT && randomListSkt.length && that.spinner.succeed(`random list sakit ready: ${randomListSkt.length}`)
     that.randomList = [
-      ...randomListSht.map( no => ({
+      ...randomListSht.map(no => ({
         no,
         ket: 'sht'
       })),
-      ...randomListSkt.map( no => ({
+      ...randomListSkt.map(no => ({
         no,
         ket: 'skt'
       })),
-      ...randomListDM.map( no => ({
+      ...randomListDM.map(no => ({
         no,
         ket: 'dm'
       })),
-      ...randomListHT.map( no => ({
+      ...randomListHT.map(no => ({
         no,
         ket: 'ht'
       }))
     ]
 
-  }catch(e){
+  } catch (e) {
     console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
   }
 }
 
-exports._getPeserta = async({
+exports._getPeserta = async ({
   that
 }) => {
   try {
@@ -496,7 +504,7 @@ exports._getPeserta = async({
     let kunjBlnIni = []
     let tanggal = that.tglBlnLalu()
 
-    while(!tanggal.includes(blnThn)) {
+    while (!tanggal.includes(blnThn)) {
       let kunjHariIni = await that.getPendaftaranProvider({
         tanggal
       })
@@ -504,71 +512,71 @@ exports._getPeserta = async({
       tanggal = that.tglKmrn(tanggal)
     }
 
-    const kartuList = kunjBlnIni.map( ({
+    const kartuList = kunjBlnIni.map(({
       peserta: {
         noKartu
       }
-    }) => noKartu )
+    }) => noKartu)
 
     const uniqKartu = that.uniqEs6(kartuList)
 
     return uniqKartu
 
-  }catch(e){
+  } catch (e) {
     that.spinner.fail(e)
   }
 }
 
-exports._getRiwayatKunjungan = async ({that, peserta, bln}) => {
+exports._getRiwayatKunjungan = async ({ that, peserta, bln }) => {
   let riws = []
 
-  try{
+  try {
 
-    if(that.config.ARANGODB_DB){
+    if (that.config.ARANGODB_DB) {
       let kunjDB = await that.arangoQuery({
         aq: `FOR k IN kunjJKN
         FILTER k.peserta.noKartu == "${peserta.noKartu}"
-        ${bln? `AND CONTAINS(k.tglKunjungan, "${bln}")` : ''}
+        ${bln ? `AND CONTAINS(k.tglKunjungan, "${bln}")` : ''}
         RETURN k`
       })
       kunjDB.length ? riws = kunjDB : null
     }
 
-    if(!riws.length) {
+    if (!riws.length) {
       const { headers } = await that.getArgs()
       const baseURL = `${that.config.APIV3}`
-  
+
       const instance = axios.create({
         baseURL,
         headers
       })
 
-      that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu }`)
+      that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu}`)
       let res = await instance.get(`/kunjungan/peserta/${peserta.noKartu}`)
       // that.spinner.succeed()
-      if(res && res.data && res.data.response && res.data.response.list.length){
+      if (res && res.data && res.data.response && res.data.response.list.length) {
         riws = res.data.response.list
-        if(riws && riws.length) for(let riw of riws){
+        if (riws && riws.length) for (let riw of riws) {
           that.config.ARANGODB_DB && await that.arangoUpsert({
             coll: 'kunjJKN',
             doc: riw
-          })        
+          })
         }
       }
     }
 
     let bb = 0
     let tb = 0
-    if(riws && riws.length) {
-      for(let riw of riws){
-        if(riw.tinggiBadan > 0 ) {
+    if (riws && riws.length) {
+      for (let riw of riws) {
+        if (riw.tinggiBadan > 0) {
           tb = riw.tinggiBadan
         }
-        if(riw.beratBadan > 0) {
+        if (riw.beratBadan > 0) {
           bb = riw.beratBadan
         }
-        if(bb && tb) {
-          if(!that.dataBBTB){
+        if (bb && tb) {
+          if (!that.dataBBTB) {
             that.dataBBTB = []
           }
           that.dataBBTB.push({
@@ -576,44 +584,44 @@ exports._getRiwayatKunjungan = async ({that, peserta, bln}) => {
             tinggiBadan: tb,
             beratBadan: bb
           })
-          if(!that.cekPstSudah){
+          if (!that.cekPstSudah) {
             that.cekPstSudah = []
           }
           that.cekPstSudah.push(riw.peserta.noKartu)
-  
+
           break
         }
       }
     }
     return riws
 
-  }catch(e){
+  } catch (e) {
     console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
   }
 }
 
-exports._getPesertaByNoka = async ({ that, noka}) => {
+exports._getPesertaByNoka = async ({ that, noka }) => {
   noka = (escape(noka)).split(' ').join('')
-  if(noka.length === 13){
-    try{
+  if (noka.length === 13) {
+    try {
       const { headers } = await that.getArgs()
-  
+
       that.spinner.start(`get peserta by no kartu: ${noka}`)
-  
+
       const baseURL = `${that.config.APIV3}`
-    
+
       const instance = axios.create({
         baseURL,
         headers
       })
-  
+
       let res = await instance.get(`/peserta/noka/${noka}`)
-      if(res && res.data && res.data.response){
+      if (res && res.data && res.data.response) {
         return res.data.response
       }
       return null
-  
-    }catch(e){
+
+    } catch (e) {
       console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
       return null
     }
