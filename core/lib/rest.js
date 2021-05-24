@@ -114,7 +114,7 @@ exports._getMCU = async ({
     //   }
     // }
 
-    if (!mcu || (mcu && !mcu.length)) {
+    // if (!mcu || (mcu && !mcu.length)) {
       const { headers } = await that.getArgs()
 
       const baseURL = `${that.config.APIV3}`
@@ -136,7 +136,7 @@ exports._getMCU = async ({
         mcu = res.data.response
       }
 
-    }
+    // }
 
     console.log(mcu)
 
