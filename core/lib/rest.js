@@ -102,17 +102,17 @@ exports._getMCU = async ({
   try {
 
     let mcu
-    if (that.config.ARANGODB_DB) {
-      let mcuDB = await that.arangoQuery({
-        aq: `FOR m in mcu
-        FILTER m._key == "${noKunjungan}"
-        RETURN m`
-      })
+    // if (that.config.ARANGODB_DB) {
+    //   let mcuDB = await that.arangoQuery({
+    //     aq: `FOR m in mcu
+    //     FILTER m._key == "${noKunjungan}"
+    //     RETURN m`
+    //   })
 
-      if (mcuDB.length) {
-        mcu = mcuDB
-      }
-    }
+    //   if (mcuDB.length) {
+    //     mcu = mcuDB
+    //   }
+    // }
 
     if (!mcu || (mcu && !mcu.length)) {
       const { headers } = await that.getArgs()
@@ -262,7 +262,9 @@ exports._getPendaftaranProvider = async ({
 
     let tgl = Number(tanggal.split('-')[0])
 
-    if (that.config.ARANGODB_DB && (!tanggal.includes(that.blnThn()) || (tanggal.includes(that.blnThn()) && that.tgl() - tgl > 4))) {
+    // console.log(that.blnThn(), tanggal, tanggal.includes(that.blnThn()))
+
+    if (that.config.ARANGODB_DB && !tanggal.includes(that.blnThn())) { // || (tanggal.includes(that.blnThn()) && that.tgl() - tgl > 4))) {
       let daftDB = await that.arangoQuery({
         aq: `FOR d in pendaftaranJKN
         FILTER d._key == "${tanggal}"

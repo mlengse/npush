@@ -105,8 +105,13 @@ module.exports = async (isPM2) => {
                 noKunjungan: re.noKunjungan
               })
               if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
+  
                 if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
                   if(re.progProlanis.nmProgram && re.progProlanis.nmProgram.includes('DM')){
+                    // console.log('')
+                    // console.log(re)
+                    // console.log(mc)
+
                     isDMControlled = true
                   } else {
                     let peserta
