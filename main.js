@@ -64,36 +64,27 @@ module.exports = async (isPM2) => {
             if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10') ){
               isHT = true
               if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
-                if(re.progProlanis.nmProgram && re.progProlanis.nmProgram.includes('HT')){
-                  isHTControlled = true
-                } else {
-                  let peserta
-                  
-                  app.config.ARANGODB_DB ? peserta = await app.arangoQuery({
-                    aq: `FOR p IN pesertaJKN
-                    FILTER p._key == "${re.peserta.noKartu}"
-                    RETURN p`
-                  }): null
+                let pesertaArr, peserta
+                app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
+                  aq: `FOR p IN pesertaJKN
+                  FILTER p._key == "${re.peserta.noKartu}"
+                  RETURN p`
+                }): pesertaArr = await app.getPesertaByNoka({
+                  noka: re.peserta.noKartu
+                })
 
-                  if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
-                    isHTControlled = true
-                  } else {
-                    peserta = await app.getPesertaByNoka({
-                      noka: re.peserta.noKartu
-                    })
-                    // console.log(peserta)
-                    app.config.ARANGODB_DB && await app.arangoUpsert({
-                      coll: 'pesertaJKN',
-                      doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
-                        _key: re.peserta.noKartu,
-                      })
-                    })
-                    if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
-                      isHTControlled = true
-                    }
+                peserta = pesertaArr[0]
     
-                  }
-                } 
+                if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
+                  isHTControlled = true
+                }
+                
+                app.config.ARANGODB_DB && await app.arangoUpsert({
+                  coll: 'pesertaJKN',
+                  doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
+                    _key: re.peserta.noKartu,
+                  })
+                })
               }
             }
 
@@ -109,17 +100,6 @@ module.exports = async (isPM2) => {
               if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
   
                 if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
-                  // console.log('')
-                  // console.log('is controlled: ', JSON.stringify(mc))
-                  // if(re.progProlanis.nmProgram && re.progProlanis.nmProgram.includes('DM')){
-                  //   // console.log('')
-                  //   // console.log(re)
-                  //   // console.log(mc)
-
-                  //   isDMControlled = true
-                  // } 
-                  
-                  // if(!isDMControlled) {
                   let pesertaArr, peserta
                   app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
                     aq: `FOR p IN pesertaJKN
@@ -132,11 +112,6 @@ module.exports = async (isPM2) => {
                   peserta = pesertaArr[0]
       
                   if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
-                    // console.log('')
-                    // console.log('-------------')
-                    // console.log('is DM: ', JSON.stringify(re))
-                    // console.log('is controlled: ', JSON.stringify(mc))
-                    // console.log('is prolanis: ', JSON.stringify(peserta))
                     isDMControlled = true
                   }
                   
