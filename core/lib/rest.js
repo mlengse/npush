@@ -134,6 +134,9 @@ exports._getMCU = async ({
             _key: noKunjungan,
           })
         })
+
+        console.log(res.data.response)
+        
         return res.data.response
         
       }
