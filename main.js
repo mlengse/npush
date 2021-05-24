@@ -78,13 +78,13 @@ module.exports = async (isPM2) => {
                 }
     
                 if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
-                  console.log('')
-                  console.log('-------------')
-                  console.log('is HT controlled: ', JSON.stringify(re))
-                  console.log('is prolanis: ', JSON.stringify(peserta))
+                  // console.log('')
+                  // console.log('-------------')
+                  // console.log('is HT controlled: ', JSON.stringify(re))
+                  // console.log('is prolanis: ', JSON.stringify(peserta))
                   if(kunjHT.indexOf(peserta.noKartu) === -1){
                     kunjHT.push(peserta.noKartu)
-                    console.log('kunj HT: ', kunjHT.length)
+                    // console.log('kunj HT: ', kunjHT.length)
                   }
                   isHTControlled = true
                 }
@@ -101,8 +101,9 @@ module.exports = async (isPM2) => {
             if((re.diagnosa1.kdDiag === 'E11.9' || re.diagnosa2.kdDiag === 'E11.9' || re.diagnosa3.kdDiag === 'E11.9'
             || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11'
             ) ){
-              // console.log('')
-              // console.log('is DM: ', JSON.stringify(re))
+              console.log('')
+              console.log('-------------')
+              console.log('is DM: ', JSON.stringify(re))
               isDM = true
               let mcu = await app.getMCU({
                 noKunjungan: re.noKunjungan
@@ -110,6 +111,11 @@ module.exports = async (isPM2) => {
               if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
   
                 if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
+                  console.log('')
+                  // console.log('-------------')
+                  // console.log('is DM: ', JSON.stringify(re))
+                  console.log('is controlled: ', JSON.stringify(mc))
+
                   app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
                     aq: `FOR p IN pesertaJKN
                     FILTER p._key == "${re.peserta.noKartu}"
@@ -124,9 +130,9 @@ module.exports = async (isPM2) => {
       
                   if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
                     console.log('')
-                    console.log('-------------')
-                    console.log('is DM: ', JSON.stringify(re))
-                    console.log('is controlled: ', JSON.stringify(mc))
+                    // console.log('-------------')
+                    // console.log('is DM: ', JSON.stringify(re))
+                    // console.log('is controlled: ', JSON.stringify(mc))
                     console.log('is prolanis: ', JSON.stringify(peserta))
                     isDMControlled = true
                     if(kunjDM.indexOf(peserta.noKartu) === -1){
