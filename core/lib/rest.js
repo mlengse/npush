@@ -134,7 +134,7 @@ exports._getMCU = async ({
             _key: noKunjungan,
           })
         })
-        mcu = res.data.response
+        return res.data.response
         
       }
 
@@ -145,7 +145,7 @@ exports._getMCU = async ({
     return mcu
   } catch (e) {
     console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
-    return null
+    // return null
   }
 
 
