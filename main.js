@@ -108,6 +108,7 @@ module.exports = async (isPM2) => {
               let mcu = await app.getMCU({
                 noKunjungan: re.noKunjungan
               })
+              console.log('mcu   :', JSON.stringify(mcu))
               if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
   
                 if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
