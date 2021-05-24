@@ -128,15 +128,15 @@ exports._getMCU = async ({
       // console.log(res.data.response)
       if (res && res.data && res.data.response && res.data.response.count) {
 
-        await that.arangoUpsert({
-          coll: 'mcu',
-          doc: Object.assign({}, res.data.response, {
-            _key: noKunjungan,
-          })
-        })
+        // await that.arangoUpsert({
+        //   coll: 'mcu',
+        //   doc: Object.assign({}, res.data.response, {
+        //     _key: noKunjungan,
+        //   })
+        // })
 
         console.log(res.data.response)
-        
+
         return res.data.response
         
       }
