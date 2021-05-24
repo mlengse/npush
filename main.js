@@ -113,31 +113,28 @@ module.exports = async (isPM2) => {
                     // console.log(mc)
 
                     isDMControlled = true
-                  } else {
+                  } 
+                  
+                  if(!isDMControlled) {
                     let peserta
                     app.config.ARANGODB_DB ? peserta = await app.arangoQuery({
                       aq: `FOR p IN pesertaJKN
                       FILTER p._key == "${re.peserta.noKartu}"
                       RETURN p`
-                    }): null
+                    }): peserta = await app.getPesertaByNoka({
+                      noka: re.peserta.noKartu
+                    })
   
                     if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
                       isDMControlled = true
-                    } else {
-                      peserta =  await app.getPesertaByNoka({
-                        noka: re.peserta.noKartu
-                      })
-                      // console.log(peserta)
-                      app.config.ARANGODB_DB && await app.arangoUpsert({
-                        coll: 'pesertaJKN',
-                        doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
-                          _key: re.peserta.noKartu,
-                        })
-                      })
-                      if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
-                        isDMControlled = true
-                      }
                     }
+                    
+                    app.config.ARANGODB_DB && await app.arangoUpsert({
+                      coll: 'pesertaJKN',
+                      doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
+                        _key: re.peserta.noKartu,
+                      })
+                    })
                   }
                 }
               }
@@ -234,17 +231,17 @@ module.exports = async (isPM2) => {
           inputSakit = 0
         }
 
-        if(inputHT > 0){
+        if( app.config.RPPT && inputHT > 0){
           app.spinner.succeed(`HT Prolanis terkendali: ${kunjHT.length} dari kunj HT: ${htAll} atau: ${Math.floor(1000*kunjHT.length/htAll)/10} %`)
           app.spinner.succeed(`kunj HT yg harus diinput: ${inputHT}`)
         }
 
-        if(inputDM > 0 ){
+        if( app.config.RPPT && inputDM > 0 ){
           app.spinner.succeed(`DM Prolanis terkendali: ${kunjDM.length} dari kunj DM: ${dmAll} atau: ${Math.floor(1000*kunjDM.length/dmAll)/10} %`)
           app.spinner.succeed(`kunj DM yg harus diinput: ${inputDM}`)
         }
 
-        if(inputSakit > 0) {
+        if( app.config.KUNJ_SAKIT && inputSakit > 0) {
           app.spinner.succeed(`rujukan: ${rujukan} dari kunj sakit: ${app.kunjSakitBlnIni.length} atau: ${Math.floor(1000*rujukan/app.kunjSakitBlnIni.length)/10} %`)
           app.spinner.succeed(`Kunj sakit yg harus diinput: ${inputSakit}`)
         }
