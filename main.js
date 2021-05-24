@@ -69,13 +69,20 @@ module.exports = async (isPM2) => {
                   aq: `FOR p IN pesertaJKN
                   FILTER p._key == "${re.peserta.noKartu}"
                   RETURN p`
-                }): pesertaArr = await app.getPesertaByNoka({
+                }): peserta = await app.getPesertaByNoka({
                   noka: re.peserta.noKartu
                 })
 
-                peserta = pesertaArr[0]
+                if(!peserta) {
+                  peserta = pesertaArr[0]
+                }
     
                 if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
+                  // console.log('')
+                  // console.log('-------------')
+                  // console.log('is HT controlled: ', JSON.stringify(re))
+                  // console.log('is prolanis: ', JSON.stringify(peserta))
+
                   isHTControlled = true
                 }
                 
@@ -100,18 +107,24 @@ module.exports = async (isPM2) => {
               if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
   
                 if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
-                  let pesertaArr, peserta
                   app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
                     aq: `FOR p IN pesertaJKN
                     FILTER p._key == "${re.peserta.noKartu}"
                     RETURN p`
-                  }): pesertaArr = await app.getPesertaByNoka({
+                  }): peserta = await app.getPesertaByNoka({
                     noka: re.peserta.noKartu
                   })
 
-                  peserta = pesertaArr[0]
+                  if(!peserta) {
+                    peserta = pesertaArr[0]
+                  }
       
                   if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
+                    // console.log('')
+                    // console.log('-------------')
+                    // console.log('is DM: ', JSON.stringify(re))
+                    // console.log('is controlled: ', JSON.stringify(mc))
+                    // console.log('is prolanis: ', JSON.stringify(peserta))
                     isDMControlled = true
                   }
                   

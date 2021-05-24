@@ -614,6 +614,7 @@ exports._getPesertaByNoka = async ({ that, noka }) => {
 
       let res = await instance.get(`/peserta/noka/${noka}`)
       if (res && res.data && res.data.response) {
+        // console.log(res.data.response)
         return res.data.response
       }
       return null
