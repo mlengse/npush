@@ -138,11 +138,11 @@ exports._getMCU = async ({
 
     // }
 
-    console.log(mcu)
+    // console.log(mcu)
 
     return mcu
   } catch (e) {
-    // console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+    console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
     return null
   }
 
