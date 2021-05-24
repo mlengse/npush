@@ -105,6 +105,37 @@ module.exports = async (isPM2) => {
               console.log('-------------')
               console.log('is DM: ', JSON.stringify(re))
               isDM = true
+
+              let pesertaArr, peserta
+
+              app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
+                aq: `FOR p IN pesertaJKN
+                FILTER p._key == "${re.peserta.noKartu}"
+                RETURN p`
+              }): peserta = await app.getPesertaByNoka({
+                noka: re.peserta.noKartu
+              })
+
+              if(!peserta) {
+                peserta = pesertaArr[0]
+              }
+  
+              if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
+                console.log('')
+                // console.log('-------------')
+                // console.log('is DM: ', JSON.stringify(re))
+                // console.log('is controlled: ', JSON.stringify(mc))
+                console.log('is prolanis: ', JSON.stringify(peserta))
+        
+              }
+              
+              app.config.ARANGODB_DB && await app.arangoUpsert({
+                coll: 'pesertaJKN',
+                doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
+                  _key: re.peserta.noKartu,
+                })
+              })
+
               let mcu = await app.getMCU({
                 noKunjungan: re.noKunjungan
               })
@@ -116,40 +147,11 @@ module.exports = async (isPM2) => {
                   // console.log('-------------')
                   // console.log('is DM: ', JSON.stringify(re))
                   console.log('is controlled: ', JSON.stringify(mc))
-
-                  app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
-                    aq: `FOR p IN pesertaJKN
-                    FILTER p._key == "${re.peserta.noKartu}"
-                    RETURN p`
-                  }): peserta = await app.getPesertaByNoka({
-                    noka: re.peserta.noKartu
-                  })
-
-                  if(!peserta) {
-                    peserta = pesertaArr[0]
+                  isDMControlled = true
+                  if(kunjDM.indexOf(peserta.noKartu) === -1){
+                    kunjDM.push(peserta.noKartu)
+                    console.log('kunj DM :', kunjDM.length)
                   }
-      
-                  if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
-                    console.log('')
-                    // console.log('-------------')
-                    // console.log('is DM: ', JSON.stringify(re))
-                    // console.log('is controlled: ', JSON.stringify(mc))
-                    console.log('is prolanis: ', JSON.stringify(peserta))
-                    isDMControlled = true
-                    if(kunjDM.indexOf(peserta.noKartu) === -1){
-                      kunjDM.push(peserta.noKartu)
-                      console.log('kunj DM :', kunjDM.length)
-                    }
-            
-                  }
-                  
-                  app.config.ARANGODB_DB && await app.arangoUpsert({
-                    coll: 'pesertaJKN',
-                    doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
-                      _key: re.peserta.noKartu,
-                    })
-                  })
-                  // }
                 }
               }
             }
