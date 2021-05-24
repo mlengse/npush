@@ -3,6 +3,7 @@ if(process.env.NODE_ENV !== 'production'){
 }
 const Core = require('./core')
 const config = require('./config')
+const { texttospeech_v1beta1 } = require('googleapis')
 
 const app = new Core(config)
 
@@ -121,11 +122,11 @@ module.exports = async (isPM2) => {
               }
   
               if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
-                console.log('')
-                console.log('-------------')
-                console.log('is DM: ', JSON.stringify(re))
-                // console.log('is controlled: ', JSON.stringify(mc))
-                console.log('is prolanis: ', JSON.stringify(peserta))
+                // console.log('')
+                // console.log('-------------')
+                // console.log('is DM: ', JSON.stringify(re))
+                // // console.log('is controlled: ', JSON.stringify(mc))
+                // console.log('is prolanis: ', JSON.stringify(peserta))
                 let mcu = await app.getMCU({
                   noKunjungan: re.noKunjungan
                 })
@@ -134,14 +135,14 @@ module.exports = async (isPM2) => {
                 if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
     
                   if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
-                    console.log('')
-                    // console.log('-------------')
-                    // console.log('is DM: ', JSON.stringify(re))
-                    console.log('is controlled: ', JSON.stringify(mc))
+                    // console.log('')
+                    // // console.log('-------------')
+                    // // console.log('is DM: ', JSON.stringify(re))
+                    // console.log('is controlled: ', JSON.stringify(mc))
                     isDMControlled = true
                     if(kunjDM.indexOf(peserta.noKartu) === -1){
                       kunjDM.push(peserta.noKartu)
-                      console.log('kunj DM :', kunjDM.length)
+                      app.spinner.succeed('kunj DM :', kunjDM.length)
                     }
                   }
                 }
