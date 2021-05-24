@@ -100,6 +100,7 @@ module.exports = async (isPM2) => {
             if((re.diagnosa1.kdDiag === 'E11.9' || re.diagnosa2.kdDiag === 'E11.9' || re.diagnosa3.kdDiag === 'E11.9'
             || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11'
             ) ){
+              console.log('is DM: ', JSON.stringify(re))
               isDM = true
               let mcu = await app.getMCU({
                 noKunjungan: re.noKunjungan
@@ -107,13 +108,14 @@ module.exports = async (isPM2) => {
               if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
   
                 if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
-                  if(re.progProlanis.nmProgram && re.progProlanis.nmProgram.includes('DM')){
-                    // console.log('')
-                    // console.log(re)
-                    // console.log(mc)
+                  console.log('is controlled: ', JSON.stringify(mc))
+                  // if(re.progProlanis.nmProgram && re.progProlanis.nmProgram.includes('DM')){
+                  //   // console.log('')
+                  //   // console.log(re)
+                  //   // console.log(mc)
 
-                    isDMControlled = true
-                  } 
+                  //   isDMControlled = true
+                  // } 
                   
                   if(!isDMControlled) {
                     let peserta
@@ -126,6 +128,7 @@ module.exports = async (isPM2) => {
                     })
   
                     if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
+                      console.log('is prolanis: ', JSON.stringify(peserta))
                       isDMControlled = true
                     }
                     
