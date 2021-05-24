@@ -125,7 +125,6 @@ exports._getMCU = async ({
       })
 
       let res = await instance.get(`/mcu/kunjungan/${noKunjungan}`)
-      console.log(JSON.stringify(res))
       if (res && res.data && res.data.response && res.data.response.count) {
         await that.arangoUpsert({
           coll: 'mcu',
@@ -138,7 +137,7 @@ exports._getMCU = async ({
 
     }
 
-    // console.log(mcu)
+    console.log(mcu)
 
     return mcu
   } catch (e) {
