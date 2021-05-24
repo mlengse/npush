@@ -142,7 +142,7 @@ module.exports = async (isPM2) => {
                     isDMControlled = true
                     if(kunjDM.indexOf(peserta.noKartu) === -1){
                       kunjDM.push(peserta.noKartu)
-                      app.spinner.succeed('kunj DM :', kunjDM.length)
+                      app.spinner.succeed(`kunj DM: ${kunjDM.length}`)
                     }
                   }
                 }
