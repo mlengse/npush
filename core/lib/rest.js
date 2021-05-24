@@ -126,10 +126,10 @@ exports._getMCU = async ({
 
       let res = await instance.get(`/mcu/kunjungan/${noKunjungan}`)
       // console.log(res.data.response)
-      res && console.log(res)
-      res.data && console.log(res.data)
-      res.data.response && console.log(res.data.response)
-      if (res && res.data && res.data.response && res.data.response.count) {
+      // res && console.log(res)
+      // res.data && console.log(res.data)
+      // res.data.response && console.log(res.data.response)
+      if (res && res.data && res.data.response) {
 
         // await that.arangoUpsert({
         //   coll: 'mcu',
@@ -138,7 +138,7 @@ exports._getMCU = async ({
         //   })
         // })
 
-        console.log(res.data.response)
+        // console.log(res.data.response)
 
         return res.data.response
         
@@ -151,7 +151,7 @@ exports._getMCU = async ({
     return mcu
   } catch (e) {
     console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
-    // return null
+    return null
   }
 
 
