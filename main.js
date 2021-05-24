@@ -100,7 +100,8 @@ module.exports = async (isPM2) => {
             if((re.diagnosa1.kdDiag === 'E11.9' || re.diagnosa2.kdDiag === 'E11.9' || re.diagnosa3.kdDiag === 'E11.9'
             || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11'
             ) ){
-              console.log('is DM: ', JSON.stringify(re))
+              // console.log('')
+              // console.log('is DM: ', JSON.stringify(re))
               isDM = true
               let mcu = await app.getMCU({
                 noKunjungan: re.noKunjungan
@@ -108,7 +109,8 @@ module.exports = async (isPM2) => {
               if(mcu && mcu.list && mcu.list.length ) for( let mc of mcu.list) {
   
                 if(mc.gulaDarahPuasa > 0 && mc.gulaDarahPuasa < 130 ) {
-                  console.log('is controlled: ', JSON.stringify(mc))
+                  // console.log('')
+                  // console.log('is controlled: ', JSON.stringify(mc))
                   // if(re.progProlanis.nmProgram && re.progProlanis.nmProgram.includes('DM')){
                   //   // console.log('')
                   //   // console.log(re)
@@ -117,28 +119,34 @@ module.exports = async (isPM2) => {
                   //   isDMControlled = true
                   // } 
                   
-                  if(!isDMControlled) {
-                    let peserta
-                    app.config.ARANGODB_DB ? peserta = await app.arangoQuery({
-                      aq: `FOR p IN pesertaJKN
-                      FILTER p._key == "${re.peserta.noKartu}"
-                      RETURN p`
-                    }): peserta = await app.getPesertaByNoka({
-                      noka: re.peserta.noKartu
-                    })
-  
-                    if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
-                      console.log('is prolanis: ', JSON.stringify(peserta))
-                      isDMControlled = true
-                    }
-                    
-                    app.config.ARANGODB_DB && await app.arangoUpsert({
-                      coll: 'pesertaJKN',
-                      doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
-                        _key: re.peserta.noKartu,
-                      })
-                    })
+                  // if(!isDMControlled) {
+                  let pesertaArr, peserta
+                  app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
+                    aq: `FOR p IN pesertaJKN
+                    FILTER p._key == "${re.peserta.noKartu}"
+                    RETURN p`
+                  }): pesertaArr = await app.getPesertaByNoka({
+                    noka: re.peserta.noKartu
+                  })
+
+                  peserta = pesertaArr[0]
+      
+                  if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
+                    // console.log('')
+                    // console.log('-------------')
+                    // console.log('is DM: ', JSON.stringify(re))
+                    // console.log('is controlled: ', JSON.stringify(mc))
+                    // console.log('is prolanis: ', JSON.stringify(peserta))
+                    isDMControlled = true
                   }
+                  
+                  app.config.ARANGODB_DB && await app.arangoUpsert({
+                    coll: 'pesertaJKN',
+                    doc: Object.assign({}, re.peserta, re.progProlanis, peserta, {
+                      _key: re.peserta.noKartu,
+                    })
+                  })
+                  // }
                 }
               }
             }
