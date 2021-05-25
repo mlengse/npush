@@ -131,12 +131,12 @@ exports._getMCU = async ({
       // res.data.response && console.log(res.data.response)
       if (res && res.data && res.data.response) {
 
-        // await that.arangoUpsert({
-        //   coll: 'mcu',
-        //   doc: Object.assign({}, res.data.response, {
-        //     _key: noKunjungan,
-        //   })
-        // })
+        await that.arangoUpsert({
+          coll: 'mcu',
+          doc: Object.assign({}, res.data.response, {
+            _key: noKunjungan,
+          })
+        })
 
         // console.log(res.data.response)
 
@@ -409,7 +409,7 @@ exports._getPesertaInput = async ({
           beratBadan,
           tinggiBadan
         } = kart
-        if (that.cekPstSudah.indexOf(noka) === -1 && uniqKartu.indexOf(noka) === -1) {
+        if (that.cekPstSudah.indexOf(noka) === -1 && that.daftUnik.indexOf(noka) === -1) {
           that.cekPstSudah.push(noka)
 
           if (tinggiBadan === 0 || beratBadan === 0) {

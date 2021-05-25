@@ -26,7 +26,11 @@ module.exports = async (isPM2) => {
       tgl--
     }
 
+    app.daftUnik = app.uniqEs6(app.kunjBlnIni.map( ({ peserta : { noKartu } }) => noKartu))
+    // app.spinner.succeed(`${JSON.stringify(app.daftUnik)}`)
+
     app.kunjBlnIni = app.kunjBlnIni.filter( e => !e.kunjSakit || (e.kunjSakit && e.status.includes('dilayani')))
+
 
     app.spinner.succeed(`kunj total bln ${app.blnThn()}: ${app.kunjBlnIni.length}`)
 
@@ -37,19 +41,27 @@ module.exports = async (isPM2) => {
     app.kunjSakitBlnIni = app.kunjBlnIni.filter( kunj => kunj.kunjSakit)
     // app.spinner.succeed(`kunj sakit total bln ${app.blnThn()}: ${app.kunjSakitBlnIni.length}`)
     //get rasio rujukan
+
+
     let kunjSakitUnique = []
     let rujukan = 0
     let htAll = 0
     let kunjHT = []
     let dmAll = 0
     let kunjDM = []
-
+    if(htAll < app.config.HT) {
+      htAll = app.config.HT
+    }
+    if(dmAll < app.config.DM) {
+      dmAll = app.config.DM
+    }
     for( let {peserta} of app.kunjSakitBlnIni ) {
       let isHT = false
       let isHTControlled = false
       let isDM = false
       let isDMControlled = false
       //hitung jml rujukan
+      
       if(kunjSakitUnique.indexOf(peserta.noKartu) === -1){
         let res = await app.getRiwayatKunjungan({ 
           peserta,
@@ -62,7 +74,9 @@ module.exports = async (isPM2) => {
           blnThn.shift()
           blnThn = blnThn.join('-')
           if(blnThn === app.blnThn()) {
-            if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10') ){
+            if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10')
+            && 100*kunjHT.length/htAll < 5 
+            ){
               isHT = true
               if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
                 let pesertaArr, peserta
@@ -100,8 +114,9 @@ module.exports = async (isPM2) => {
             }
 
             if((re.diagnosa1.kdDiag === 'E11.9' || re.diagnosa2.kdDiag === 'E11.9' || re.diagnosa3.kdDiag === 'E11.9'
-            || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11'
-            ) ){
+            || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11') 
+            && 100*kunjDM.length/dmAll < 5
+            ){
               // console.log('')
               // console.log('-------------')
               // console.log('is DM: ', JSON.stringify(re))
@@ -142,7 +157,7 @@ module.exports = async (isPM2) => {
                     isDMControlled = true
                     if(kunjDM.indexOf(peserta.noKartu) === -1){
                       kunjDM.push(peserta.noKartu)
-                      app.spinner.succeed(`kunj DM: ${kunjDM.length}`)
+                      app.spinner.succeed(`kunj DM: ${kunjDM.length} | ${re.tglKunjungan} | ${re.peserta.noKartu} | ${re.noKunjungan} | ${peserta.pstProl} | ${mc.gulaDarahPuasa}`)
                     }
                   }
                 }
@@ -306,9 +321,11 @@ module.exports = async (isPM2) => {
       let noT = 0
       for(let pendaftaran of detailList) {
         noT++
-        app.spinner.succeed(`${noT}: ${pendaftaran.det.tglDaftar} | ${pendaftaran.det.noKartu}`)
-        // app.spinner.succeed(`${kunjIni.indexOf(pendaftaran.det.noKartu)}, ${pendaftaran.det.noKartu}`)
 
+        let adakahDaft = app.daftUnik.filter( noKartu => noKartu === pendaftaran.det.noKartu )
+
+        app.spinner.succeed(`${noT}: ${pendaftaran.det.tglDaftar} | ${pendaftaran.det.noKartu} | ${adakahDaft.length ? `ada ${JSON.stringify(adakahDaft)}` : 'tidak ada'}`)
+        
         app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
         let daftResponse, kunjResponse, mcuResponse 
         
