@@ -131,7 +131,7 @@ exports._getMCU = async ({
       // res.data.response && console.log(res.data.response)
       if (res && res.data && res.data.response) {
 
-        await that.arangoUpsert({
+        that.config.ARANGODB_DB && await that.arangoUpsert({
           coll: 'mcu',
           doc: Object.assign({}, res.data.response, {
             _key: noKunjungan,
