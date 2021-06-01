@@ -38,7 +38,17 @@ const app = new Core(config)
     app.kunjTWjr = app.kunjBlnIni.filter( e => !e.kunjSakit || (e.kunjSakit && !e.status.includes('dilayani')))
 
     for (let kunj of app.kunjTWjr ) {
-      console.log(kunj)
+      if(['2', '26'].indexOf(kunj.tglDaftar.split('-')[0]) > -1
+      || (kunj.kunjSakit && !kunj.status.includes('dilayani'))
+      ){
+        await app.deletePendaftaran({
+          noKartu: kunj.peserta.noKartu,
+          tgldaftar: kunj.tglDaftar,
+          noUrut: kunj.noUrut,
+          kdPoli: kunj.poli.kdPoli
+        })
+        app.spinner.succeed(`${JSON.stringify(kunj)}`)
+      }
     }
 
     // app.spinner.succeed(`kunj total bln ${app.blnThn()}: ${app.kunjBlnIni.length}`)
