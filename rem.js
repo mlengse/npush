@@ -18,9 +18,11 @@ const app = new Core(config)
     app.cekPstSudah =[]
 
     //get kunj bln ini
-    let tgl = app.tgl()
+    // let tgl = app.tgl()
+    let tgl = 31
     while(tgl){
-      let tglHariIni = `${tgl}-${app.blnThn()}`
+      let tglHariIni = `${tgl}-${'05-2021'}`
+      // let tglHariIni = `${tgl}-${app.blnThn()}`
       let kunjHariIni = await app.getPendaftaranProvider({
         tanggal: tglHariIni
       })
