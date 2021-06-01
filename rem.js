@@ -41,13 +41,14 @@ const app = new Core(config)
       if(['2', '26'].indexOf(kunj.tgldaftar.split('-')[0]) > -1
       || (kunj.kunjSakit && !kunj.status.includes('dilayani'))
       ){
-        await app.deletePendaftaran({
+        let res = await app.deletePendaftaran({
           noKartu: kunj.peserta.noKartu,
           tgldaftar: kunj.tgldaftar,
           noUrut: kunj.noUrut,
           kdPoli: kunj.poli.kdPoli
         })
-        app.spinner.succeed(`${JSON.stringify(kunj)}`)
+        app.spinner.succeed(`tgl ${kunj.tgldaftar}, no urut ${kunj.noUrut}, nama ${kunj.peserta.nama}, ${kunj.kunjSakit? `kunj sakit ${kunj.Status} ` : 'kunj sehat '}${kunj.poli.nmPoli}`)
+        app.spinner.succeed(`${JSON.stringify(res)}`)
       }
     }
 
