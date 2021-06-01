@@ -38,12 +38,12 @@ const app = new Core(config)
     app.kunjTWjr = app.kunjBlnIni.filter( e => !e.kunjSakit || (e.kunjSakit && !e.status.includes('dilayani')))
 
     for (let kunj of app.kunjTWjr ) {
-      if(['2', '26'].indexOf(kunj.tglDaftar.split('-')[0]) > -1
+      if(['2', '26'].indexOf(kunj.tgldaftar.split('-')[0]) > -1
       || (kunj.kunjSakit && !kunj.status.includes('dilayani'))
       ){
         await app.deletePendaftaran({
           noKartu: kunj.peserta.noKartu,
-          tgldaftar: kunj.tglDaftar,
+          tgldaftar: kunj.tgldaftar,
           noUrut: kunj.noUrut,
           kdPoli: kunj.poli.kdPoli
         })
