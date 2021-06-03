@@ -29,6 +29,8 @@ exports._daftarDelete = async ({ that, pendaftar }) => {
 }
 
 exports._getPendaftarByPpkTgl = async ({ that, tgldaftar }) =>{
+  that.spinner.start(`get pendaftar by ppk tgl: ${tgldaftar}`)
+
   let faskes = that.config.PCAREUSR
   await that.page.evaluate(async (tgldaftar, faskes) => {
 
@@ -130,7 +132,7 @@ exports._getPendaftarByPpkTgl = async ({ that, tgldaftar }) =>{
   let pendaftar = await that.page.evaluate(() => riwayatPendaftaran.ajax.json())
 
   if(pendaftar && pendaftar.response && pendaftar.response.data && pendaftar.response.data.length) {
-    console.log(pendaftar.response.data.length)
+    that.spinner.succeed(`daftar tgl: ${tgldaftar} jml: ${pendaftar.response.data.length}`)
     return pendaftar.response.data
   }
   return []

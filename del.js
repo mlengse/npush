@@ -19,7 +19,7 @@ const app = new Core()
       }
 
       let tgldaftar = `${ts}-${'05-2021'}`
-      console.log(tgldaftar)
+      // app.spinner.succeed(`tgl daftar: ${tgldaftar}`)
       let pendaftars = await app.getPendaftarByPpkTgl({ tgldaftar })
 
       let num = 0
@@ -33,7 +33,7 @@ const app = new Core()
 
             if(!pendaftar.kunjSakitF || (pendaftar.kunjSakitF && !pendaftar.status)){
             // if(tgl === 2 || tgl === 26) {
-              console.log(num, JSON.stringify(pendaftar))
+              app.spinner.succeed(`${num}, ${JSON.stringify(pendaftar)}`)
               // await app.daftarDelete({ pendaftar })
               // }
               // num++
@@ -48,7 +48,7 @@ const app = new Core()
       tgl--
 
     }
-    console.log(`process done: ${new Date()}`)
+    app.spinner.succeed(`process done: ${new Date()}`)
 
 
   }catch(e){
