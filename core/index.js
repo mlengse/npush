@@ -1,7 +1,12 @@
+require('dotenv').config()
+
 let obj = require("fs").readdirSync(require("path").join(__dirname, "lib")).reduce(( obj, file ) => Object.assign({}, obj, require("./lib/" + file)), {})
 
 module.exports = class Core {
   constructor(config) {
+    if(!config){
+      config = Object.assign({}, process.env)
+    }
     this.config = config
     this.kunjBlnIni = []
     for( let func in obj) {
