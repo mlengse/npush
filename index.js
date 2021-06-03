@@ -1,6 +1,6 @@
 const { schedule } = require('node-cron')
 const init = require('./init')
-const initRem = require('./init.rem')
+const initRem = require('./init-sheet')
 const menit = Math.floor(Math.random() * 60)
 const jamPagi = 6 + Math.floor(Math.random() * 6)
 const jamSore = 13 + Math.floor(Math.random() * 6)

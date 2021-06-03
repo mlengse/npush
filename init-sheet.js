@@ -1,5 +1,5 @@
 const start = require('./start')
-const main = require('./rem.js')
+const main = require('./sheet.js')
 const { isPuppeteer } = require('./npmls')
 module.exports = async (isPM2) => {
   let puppet = await isPuppeteer()
