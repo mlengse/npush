@@ -158,6 +158,7 @@ exports._getMCU = async ({
 }
 
 
+
 exports._sendKunj = async ({ that, daft }) => {
   // console.log(daft)
   let sistole, diastole, kdDiag1, kdDokter
@@ -373,7 +374,9 @@ exports._getPesertaInput = async ({
   uniqKartu,
   inputSakit,
   inputHT,
-  inputDM
+  inputDM,
+  listPstHT,
+  listPstDM
 }) => {
 
   try {
@@ -383,6 +386,17 @@ exports._getPesertaInput = async ({
     let randomListDM = []
     let randomListHT = []
     let randomListSkt = []
+
+    while(inputHT){
+      let ht = listPstHT.pop()
+      randomListHT.push(ht)
+      inputHT--
+    }
+    while(inputDM){
+      let dm = listPstDM.pop()
+      randomListDM.push(dm)
+      inputDM--
+    }
 
     const baleni = async () => {
 
@@ -624,6 +638,12 @@ exports._getPesertaByNoka = async ({ that, noka }) => {
       let res = await instance.get(`/peserta/noka/${noka}`)
       if (res && res.data && res.data.response) {
         // console.log(res.data.response)
+        that.config.ARANGODB_DB && await that.arangoUpsert({
+          coll: 'pesertaJKN', 
+          doc: Object.assign({}, res.data.response, {
+            _key: noka,
+          })
+        })
         return res.data.response
       }
       return null

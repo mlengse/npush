@@ -15,6 +15,8 @@ module.exports = async (isPM2) => {
     app.dataBBTB = []
     app.cekPstSudah =[]
 
+    let kunjBlnIni = []
+
     //get kunj bln ini
     let tgl = app.tgl()
     while(tgl){
@@ -22,15 +24,47 @@ module.exports = async (isPM2) => {
       let kunjHariIni = await app.getPendaftaranProvider({
         tanggal: tglHariIni
       })
-      app.kunjBlnIni = [ ...app.kunjBlnIni, ...kunjHariIni]
+      kunjBlnIni = [ ...kunjBlnIni, ...kunjHariIni]
       tgl--
     }
 
+    kunjBlnIni = kunjBlnIni.filter( e => !e.kunjSakit || (e.kunjSakit && e.status.includes('dilayani')))
+    let daftUnik = app.uniqEs6(kunjBlnIni.map( ({ peserta : { noKartu } }) => noKartu))
+
+    app.kunjBlnIni = []
+
+    for( let noka of daftUnik) {
+      let pesertaArr, peserta
+      app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
+        aq: `FOR p IN pesertaJKN
+        FILTER p._key == "${noka}"
+        RETURN p`
+      }): null
+
+      if(!peserta && pesertaArr && pesertaArr.length ) {
+        peserta = pesertaArr[0]
+      }
+
+      if(!peserta){
+        peserta = await app.getPesertaByNoka({
+          noka
+        })
+      }
+
+      // let pst = await app.getPesertaByNoka({noka})
+      // console.log(pst)
+      if(peserta && peserta.kdProviderPst && peserta.kdProviderPst.kdProvider && peserta.kdProviderPst.kdProvider === app.config.PROVIDER){
+        let findPst = kunjBlnIni.filter( e => e.peserta.noKartu === noka)
+        findPst[0].peserta = peserta
+        app.kunjBlnIni.push(findPst[0])
+        
+      }
+    }
+
     app.daftUnik = app.uniqEs6(app.kunjBlnIni.map( ({ peserta : { noKartu } }) => noKartu))
+    app.kunjSakitBlnIni = app.kunjBlnIni.filter( kunj => kunj.kunjSakit)
+
     // app.spinner.succeed(`${JSON.stringify(app.daftUnik)}`)
-
-    app.kunjBlnIni = app.kunjBlnIni.filter( e => !e.kunjSakit || (e.kunjSakit && e.status.includes('dilayani')))
-
 
     app.spinner.succeed(`kunj total bln ${app.blnThn()}: ${app.kunjBlnIni.length}`)
 
@@ -38,8 +72,6 @@ module.exports = async (isPM2) => {
     const uniqKartu = app.uniqEs6(kartuList)
     // app.spinner.succeed(`kunj total bln ${app.blnThn()}: ${app.kunjBlnIni.length}`)
 
-    app.kunjSakitBlnIni = app.kunjBlnIni.filter( kunj => kunj.kunjSakit)
-    // app.spinner.succeed(`kunj sakit total bln ${app.blnThn()}: ${app.kunjSakitBlnIni.length}`)
     //get rasio rujukan
 
 
@@ -49,6 +81,8 @@ module.exports = async (isPM2) => {
     let kunjHT = []
     let dmAll = 0
     let kunjDM = []
+    let listPstHT = []
+    let listPstDM = []
     if(htAll < app.config.HT) {
       htAll = app.config.HT
     }
@@ -79,18 +113,6 @@ module.exports = async (isPM2) => {
             ){
               isHT = true
               if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
-                let pesertaArr, peserta
-                app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
-                  aq: `FOR p IN pesertaJKN
-                  FILTER p._key == "${re.peserta.noKartu}"
-                  RETURN p`
-                }): peserta = await app.getPesertaByNoka({
-                  noka: re.peserta.noKartu
-                })
-
-                if(!peserta) {
-                  peserta = pesertaArr[0]
-                }
     
                 if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
                   // console.log('')
@@ -110,6 +132,11 @@ module.exports = async (isPM2) => {
                     _key: re.peserta.noKartu,
                   })
                 })
+              } else {
+                if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
+                  listPstHT.push(peserta.noKartu)
+                }
+  
               }
             }
 
@@ -122,19 +149,6 @@ module.exports = async (isPM2) => {
               // console.log('is DM: ', JSON.stringify(re))
               isDM = true
 
-              let pesertaArr, peserta
-
-              app.config.ARANGODB_DB ? pesertaArr = await app.arangoQuery({
-                aq: `FOR p IN pesertaJKN
-                FILTER p._key == "${re.peserta.noKartu}"
-                RETURN p`
-              }): peserta = await app.getPesertaByNoka({
-                noka: re.peserta.noKartu
-              })
-
-              if(!peserta) {
-                peserta = pesertaArr[0]
-              }
   
               if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
                 // console.log('')
@@ -159,6 +173,9 @@ module.exports = async (isPM2) => {
                       kunjDM.push(peserta.noKartu)
                       app.spinner.succeed(`kunj DM: ${kunjDM.length} | ${re.tglKunjungan} | ${re.peserta.noKartu} | ${re.noKunjungan} | ${peserta.pstProl} | ${mc.gulaDarahPuasa}`)
                     }
+                  } else {
+                    listPstDM.push(peserta.noKartu)
+
                   }
                 }
           
@@ -289,12 +306,17 @@ module.exports = async (isPM2) => {
           uniqKartu, //: [...uniqKartu, ...kunjIni],
           inputSakit,
           inputHT,
-          inputDM
+          inputDM,
+          listPstDM,
+          listPstHT
         })
       }
     }
 
     if(app.randomList && app.randomList.length) {
+
+      let tglDaftar = await app.getTglDaftar()
+
 
       //inp kunj
 
@@ -302,7 +324,8 @@ module.exports = async (isPM2) => {
         ket,
         det: {
           "kdProviderPeserta": app.config.PROVIDER,
-          "tglDaftar": app.tglDaftarA(`${app.getRandomInt(app.tgl() > 4 ? app.tgl()-4  : 1, app.tgl())}-${app.blnThn()}`),
+          tglDaftar,
+          // "tglDaftar": app.tglDaftarA(`${app.getRandomInt(app.tgl() > 4 ? app.tgl()-4  : 1, app.tgl())}-${app.blnThn()}`),
           "noKartu": no,
           "kdPoli": ket === 'sht' ? '021' : '001',
           "keluhan": null,
@@ -326,50 +349,50 @@ module.exports = async (isPM2) => {
 
         app.spinner.succeed(`${noT}: ${pendaftaran.det.tglDaftar} | ${pendaftaran.det.noKartu} | ${adakahDaft.length ? `ada ${JSON.stringify(adakahDaft)}` : 'tidak ada'}`)
         
-        app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
-        let daftResponse, kunjResponse, mcuResponse 
+        // app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
+        // let daftResponse, kunjResponse, mcuResponse 
         
-        daftResponse = await app.addPendaftaran({
-          pendaftaran: pendaftaran.det
-        })
-        if(daftResponse) app.spinner.succeed(JSON.stringify(daftResponse))
+        // daftResponse = await app.addPendaftaran({
+        //   pendaftaran: pendaftaran.det
+        // })
+        // if(daftResponse) app.spinner.succeed(JSON.stringify(daftResponse))
 
-        if(pendaftaran.det.kunjSakit) {
-          //add kunj
-          kunjResponse = await app.sendKunj({ daft: pendaftaran })
-          if(kunjResponse) {
-            app.spinner.succeed(JSON.stringify(kunjResponse))
-            if(kunjResponse && kunjResponse.response && kunjResponse.response.message && (pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht')){
-              // add mcu
+        // if(pendaftaran.det.kunjSakit) {
+        //   //add kunj
+        //   kunjResponse = await app.sendKunj({ daft: pendaftaran })
+        //   if(kunjResponse) {
+        //     app.spinner.succeed(JSON.stringify(kunjResponse))
+        //     if(kunjResponse && kunjResponse.response && kunjResponse.response.message && (pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht')){
+        //       // add mcu
 
-        //-------------------------------------------------------------------------
+        // //-------------------------------------------------------------------------
 
-              mcuResponse = await app.sendMCU({
-                daft: pendaftaran,
-                noKunjungan:kunjResponse.response.message 
-              })
-              if(mcuResponse) app.spinner.succeed(JSON.stringify(mcuResponse))
+        //       mcuResponse = await app.sendMCU({
+        //         daft: pendaftaran,
+        //         noKunjungan:kunjResponse.response.message 
+        //       })
+        //       if(mcuResponse) app.spinner.succeed(JSON.stringify(mcuResponse))
       
-        //-------------------------------------------------------------------------
-            }
-          }
+        // //-------------------------------------------------------------------------
+        //     }
+        //   }
 
-        }
+        // }
 
-        if(app.config.REDIS_HOST){
-          let sendText = await app.sendToWA({
-            push: true,
-            message: JSON.parse(JSON.stringify({
-              pendaftaran,
-              daftResponse,
-              kunjResponse,
-              mcuResponse
-            }))
-          })
+        // if(app.config.REDIS_HOST){
+        //   let sendText = await app.sendToWA({
+        //     push: true,
+        //     message: JSON.parse(JSON.stringify({
+        //       pendaftaran,
+        //       daftResponse,
+        //       kunjResponse,
+        //       mcuResponse
+        //     }))
+        //   })
 
-          app.config.ARANGODB_DB && await app.upsertKontakJKN({doc: sendText})
+        //   app.config.ARANGODB_DB && await app.upsertKontakJKN({doc: sendText})
   
-        }
+        // }
       }
 
     }
