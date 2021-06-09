@@ -266,7 +266,7 @@ module.exports = async (isPM2) => {
       const pembagi = sisaHari - 2
 
       if(pembagi > 0 || kekurangan > 0 || inputSakit || inputHT) {
-        let akanDiinput = Math.floor((kekurangan / pembagi) * 0.6) || inputSakit || inputHT;
+        let akanDiinput = Math.floor((kekurangan / pembagi) * 0.6) || inputSakit || (inputHT) || (inputDM);
         if(pembagi < 1){
           akanDiinput = Math.floor(kekurangan)
         }
@@ -284,11 +284,16 @@ module.exports = async (isPM2) => {
         if( app.config.RPPT && inputHT > 0){
           app.spinner.succeed(`HT Prolanis terkendali: ${kunjHT.length} dari kunj HT: ${htAll} atau: ${Math.floor(1000*kunjHT.length/htAll)/10} %`)
           app.spinner.succeed(`kunj HT yg harus diinput: ${inputHT}`)
+          inputHT = Math.ceil(inputHT/pembagi)
+          app.spinner.succeed(`kunj HT yg akan diinput: ${inputHT}`)
+    
         }
 
         if( app.config.RPPT && inputDM > 0 ){
           app.spinner.succeed(`DM Prolanis terkendali: ${kunjDM.length} dari kunj DM: ${dmAll} atau: ${Math.floor(1000*kunjDM.length/dmAll)/10} %`)
           app.spinner.succeed(`kunj DM yg harus diinput: ${inputDM}`)
+          inputDM = Math.ceil(inputDM/pembagi)
+          app.spinner.succeed(`kunj DM yg akan diinput: ${inputDM}`)
         }
 
         if( app.config.KUNJ_SAKIT && inputSakit > 0) {
@@ -348,52 +353,56 @@ module.exports = async (isPM2) => {
         let adakahDaft = app.daftUnik.filter( noKartu => noKartu === pendaftaran.det.noKartu )
 
         app.spinner.succeed(`${noT}: ${pendaftaran.det.tglDaftar} | ${pendaftaran.det.noKartu} | ${adakahDaft.length ? `ada ${JSON.stringify(adakahDaft)}` : 'tidak ada'}`)
-        
-        // app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
-        // let daftResponse, kunjResponse, mcuResponse 
-        
-        // daftResponse = await app.addPendaftaran({
-        //   pendaftaran: pendaftaran.det
-        // })
-        // if(daftResponse) app.spinner.succeed(JSON.stringify(daftResponse))
 
-        // if(pendaftaran.det.kunjSakit) {
-        //   //add kunj
-        //   kunjResponse = await app.sendKunj({ daft: pendaftaran })
-        //   if(kunjResponse) {
-        //     app.spinner.succeed(JSON.stringify(kunjResponse))
-        //     if(kunjResponse && kunjResponse.response && kunjResponse.response.message && (pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht')){
-        //       // add mcu
-
-        // //-------------------------------------------------------------------------
-
-        //       mcuResponse = await app.sendMCU({
-        //         daft: pendaftaran,
-        //         noKunjungan:kunjResponse.response.message 
-        //       })
-        //       if(mcuResponse) app.spinner.succeed(JSON.stringify(mcuResponse))
-      
-        // //-------------------------------------------------------------------------
-        //     }
-        //   }
-
-        // }
-
-        // if(app.config.REDIS_HOST){
-        //   let sendText = await app.sendToWA({
-        //     push: true,
-        //     message: JSON.parse(JSON.stringify({
-        //       pendaftaran,
-        //       daftResponse,
-        //       kunjResponse,
-        //       mcuResponse
-        //     }))
-        //   })
-
-        //   app.config.ARANGODB_DB && await app.upsertKontakJKN({doc: sendText})
+        if(!adakahDaft.length || pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht' ){
+          app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
+          let daftResponse, kunjResponse, mcuResponse 
+          
+          daftResponse = await app.addPendaftaran({
+            pendaftaran: pendaftaran.det
+          })
+          if(daftResponse) app.spinner.succeed(JSON.stringify(daftResponse))
   
-        // }
-      }
+          if(pendaftaran.det.kunjSakit) {
+            //add kunj
+            kunjResponse = await app.sendKunj({ daft: pendaftaran })
+            if(kunjResponse) {
+              app.spinner.succeed(JSON.stringify(kunjResponse))
+              if(kunjResponse && kunjResponse.response && kunjResponse.response.message && (pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht')){
+                // add mcu
+  
+          //-------------------------------------------------------------------------
+  
+                mcuResponse = await app.sendMCU({
+                  daft: pendaftaran,
+                  noKunjungan:kunjResponse.response.message 
+                })
+                if(mcuResponse) app.spinner.succeed(JSON.stringify(mcuResponse))
+        
+          //-------------------------------------------------------------------------
+              }
+            }
+  
+          }
+  
+          if(app.config.REDIS_HOST){
+            let sendText = await app.sendToWA({
+              push: true,
+              message: JSON.parse(JSON.stringify({
+                pendaftaran,
+                daftResponse,
+                kunjResponse,
+                mcuResponse
+              }))
+            })
+  
+            app.config.ARANGODB_DB && await app.upsertKontakJKN({doc: sendText})
+    
+          }
+   
+        }
+        
+     }
 
     }
 

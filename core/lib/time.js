@@ -9,6 +9,7 @@ if(process.env.BASE_DATE){
 // moment.now = () => +new Date('2021', '2', '28');
 exports.unixTime = () => moment().format('x')
 exports.getFormat1 = e => moment(e, 'D MMMM YYYY').format('YYYYMMDD')
+exports.getFormat2 = e => moment(e, 'D MMMM YYYY').format('YYYY-MM-DD')
 exports.checkDateA = ( a ) =>  a === moment().format('M/DD/YYYY')
 exports.checkDateC = ( a ) =>  a === moment().add(-1, 'day').format('M/DD/YYYY')
 exports.checkDate = ( a, b ) => moment(a, 'DD-MM-YYYY').format('M/DD/YYYY') === b
