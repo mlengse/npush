@@ -52,7 +52,7 @@ const app = new Core()
 
 
   }catch(e){
-    console.error(`process error: ${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+    app.spinner.fail(`process error: ${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
 
   }
 })()

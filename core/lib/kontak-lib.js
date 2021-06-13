@@ -31,11 +31,11 @@ exports._sendToWA = async ({ that, message, push }) => {
         if(field === 'noKartu'){
           errText = `\n${field}: ${message}`
         } else if(field !== 'noUrut') {
-          console.error(response)
+          that.spinner.fail(response)
         }
       }
     } else if(!JSON.stringify(response).includes('noUrut')) {
-      console.error(response)
+      that.spinner.fail(response)
     }
     // message.kunjResponse && console.error('kunj resp', message.kunjResponse)
     // message.mcuResponse && console.error('mcu resp', message.mcuResponse)

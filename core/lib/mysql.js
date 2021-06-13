@@ -114,7 +114,7 @@ exports._getPatient = async ({ that, message}) => {
         }
       }
     }catch(err) {
-      console.error(`${new Date()} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`)
+      that.spinner.fail(`${new Date()} ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`)
     }
     
   }

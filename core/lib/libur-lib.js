@@ -1,6 +1,4 @@
-const FileSync = require('lowdb/adapters/FileSync')
-const db = require('lowdb')(new FileSync('./db/db.json'))
-db.defaults({ liburnas: [] }).write()    
+
 
 exports._getTglDaftar = async({ that }) => {
   let tglDaftar = that.tglDaftarA(`${that.getRandomInt(that.tgl() > 4 ? that.tgl()-4  : 1, that.tgl())}-${that.blnThn()}`)
@@ -12,8 +10,7 @@ exports._getTglDaftar = async({ that }) => {
 
 }
 
-exports.addLiburnas = obj => db.get('liburnas').push(obj).write()
-exports.getLiburArr = tahun => db.get('liburnas').filter({ tahun }).value()
+
 
 exports._libur =  async ({that, tgl}) => {
   let liburArr = (await that.getLiburnasByThn({

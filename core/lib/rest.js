@@ -102,19 +102,21 @@ exports._getMCU = async ({
   try {
 
     let mcu
-    // if (that.config.ARANGODB_DB) {
-    //   let mcuDB = await that.arangoQuery({
-    //     aq: `FOR m in mcu
-    //     FILTER m._key == "${noKunjungan}"
-    //     RETURN m`
-    //   })
+    if (that.config.ARANGODB_DB) {
+      let mcuDB = await that.arangoQuery({
+        aq: `FOR m in mcu
+        FILTER m._key == "${noKunjungan}"
+        RETURN m`
+      })
 
-    //   if (mcuDB.length) {
-    //     mcu = mcuDB
-    //   }
-    // }
-
-    // if (!mcu || (mcu && !mcu.length)) {
+      if (mcuDB.length) {
+        mcu = mcuDB[0]
+      }
+    } else {
+      mcu = that.getMCUJSON(noKunjungan)
+    }
+      
+    if (!mcu) {
       const { headers } = await that.getArgs()
 
       const baseURL = `${that.config.APIV3}`
@@ -125,32 +127,24 @@ exports._getMCU = async ({
       })
 
       let res = await instance.get(`/mcu/kunjungan/${noKunjungan}`)
-      // console.log(res.data.response)
-      // res && console.log(res)
-      // res.data && console.log(res.data)
-      // res.data.response && console.log(res.data.response)
-      if (res && res.data && res.data.response) {
+      if (res && res.data && res.data.response && res.data.response.list ) {
 
-        that.config.ARANGODB_DB && await that.arangoUpsert({
+        that.config.ARANGODB_DB ? await that.arangoUpsert({
           coll: 'mcu',
-          doc: Object.assign({}, res.data.response, {
+          doc: Object.assign({}, res.data.response.list[0], {
             _key: noKunjungan,
           })
-        })
+        }) : that.addMCUJSON(res.data.response.list[0])
 
-        // console.log(res.data.response)
-
-        return res.data.response
+        return res.data.response.list[0]
         
       }
 
-    // }
-
-    // console.log(mcu)
+    }
 
     return mcu
   } catch (e) {
-    console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+    that.spinner.fail(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
     return null
   }
 
@@ -254,7 +248,7 @@ exports._addPendaftaran = async ({
     if(err.response && err.response.data){
       return err.response.data
     }
-    console.error(err)
+    that.spinner.fail(err)
   }
 }
 
@@ -360,7 +354,7 @@ exports._getPendaftaranProvider = async ({
     return listAll;
 
   } catch (e) {
-    console.error(e)
+    that.spinner.fail(e)
     return that.getPendaftaranProvider({
       tanggal
     })
@@ -371,7 +365,8 @@ exports._getPendaftaranProvider = async ({
 exports._getPesertaInput = async ({
   that,
   akanDiinput,
-  uniqKartu,
+  // kunjBlnIni,
+  // uniqKartu,
   inputSakit,
   inputHT,
   inputDM,
@@ -387,15 +382,16 @@ exports._getPesertaInput = async ({
     let randomListHT = []
     let randomListSkt = []
 
-    while(inputHT){
+    while(listPstHT.length && randomListHT.length < inputHT){
       let ht = listPstHT.pop()
       randomListHT.push(ht)
-      inputHT--
+      // inputHT--
     }
-    while(inputDM){
+    while(listPstDM.length && randomListDM.length < inputDM){
       let dm = listPstDM.pop()
       randomListDM.push(dm)
-      inputDM--
+      // console.log(listPstDM.length, randomListDM.length, inputDM)
+      // inputDM--
     }
 
     const baleni = async () => {
@@ -512,7 +508,7 @@ exports._getPesertaInput = async ({
     ]
 
   } catch (e) {
-    console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+    that.spinner.fail(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
   }
 }
 
@@ -547,10 +543,11 @@ exports._getPeserta = async ({
   }
 }
 
-exports._getRiwayatKunjungan = async ({ that, peserta, bln }) => {
+exports._getRiwayatKunjungan = async ({ that, peserta, bln, count }) => {
   let riws = []
 
   try {
+    that.spinner.start(`find riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu}`)
 
     if (that.config.ARANGODB_DB) {
       let kunjDB = await that.arangoQuery({
@@ -560,9 +557,11 @@ exports._getRiwayatKunjungan = async ({ that, peserta, bln }) => {
         RETURN k`
       })
       kunjDB.length ? riws = kunjDB : null
+    } else {
+      riws = that.getKunjJKNByPst(peserta.noKartu, bln)
     }
 
-    if (!riws.length) {
+    if (!riws.length  || ( riws.length && count &&  riws.length < count)) {
       const { headers } = await that.getArgs()
       const baseURL = `${that.config.APIV3}`
 
@@ -571,16 +570,16 @@ exports._getRiwayatKunjungan = async ({ that, peserta, bln }) => {
         headers
       })
 
-      that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu}`)
+      that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu}, riws ${riws.length}, count ${count}, ${riws.length < count}`)
       let res = await instance.get(`/kunjungan/peserta/${peserta.noKartu}`)
       // that.spinner.succeed()
       if (res && res.data && res.data.response && res.data.response.list.length) {
         riws = res.data.response.list
         if (riws && riws.length) for (let riw of riws) {
-          that.config.ARANGODB_DB && await that.arangoUpsert({
+          that.config.ARANGODB_DB ? await that.arangoUpsert({
             coll: 'kunjJKN',
             doc: riw
-          })
+          }) : that.addKunjJKN(riw)
         }
       }
     }
@@ -608,51 +607,70 @@ exports._getRiwayatKunjungan = async ({ that, peserta, bln }) => {
             that.cekPstSudah = []
           }
           that.cekPstSudah.push(riw.peserta.noKartu)
-
           break
         }
       }
     }
-    return riws
+    return riws.filter( e => e.tglKunjungan.includes(bln))
 
   } catch (e) {
-    console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+    // that.spinner.fail(`${new Date()} riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu} | ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
   }
 }
 
 exports._getPesertaByNoka = async ({ that, noka }) => {
+  that.spinner.start(`find peserta by no kartu: ${noka}`)
   noka = (escape(noka)).split(' ').join('')
   if (noka.length === 13) {
-    try {
-      const { headers } = await that.getArgs()
 
-      that.spinner.start(`get peserta by no kartu: ${noka}`)
+    let pesertaArr, peserta
+    that.config.ARANGODB_DB ? pesertaArr = await that.arangoQuery({
+      aq: `FOR p IN pesertaJKN
+      FILTER p._key == "${noka}"
+      RETURN p`
+    }): peserta = that.getPesertaJKN(noka)
 
-      const baseURL = `${that.config.APIV3}`
-
-      const instance = axios.create({
-        baseURL,
-        headers
-      })
-
-      let res = await instance.get(`/peserta/noka/${noka}`)
-      if (res && res.data && res.data.response) {
-        // console.log(res.data.response)
-        that.config.ARANGODB_DB && await that.arangoUpsert({
-          coll: 'pesertaJKN', 
-          doc: Object.assign({}, res.data.response, {
-            _key: noka,
-          })
-        })
-        return res.data.response
-      }
-      return null
-
-    } catch (e) {
-      console.error(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
-      return null
+    if(!peserta && pesertaArr && pesertaArr.length ) {
+      peserta = pesertaArr[0]
     }
+
+    if(!peserta || (peserta && !peserta.aktif)) {
+      try {
+        const { headers } = await that.getArgs()
+  
+        that.spinner.start(`fetch peserta by no kartu: ${noka}`)
+  
+        const baseURL = `${that.config.APIV3}`
+  
+        const instance = axios.create({
+          baseURL,
+          headers
+        })
+  
+        let res = await instance.get(`/peserta/noka/${noka}`)
+        if (res && res.data && res.data.response) {
+          // console.log(res.data.response)
+          that.config.ARANGODB_DB ? await that.arangoUpsert({
+            coll: 'pesertaJKN', 
+            doc: Object.assign({}, res.data.response, {
+              _key: noka,
+            })
+          }) : that.addPesertaJKN(res.data.response)
+          return res.data.response
+        }
+        return null
+  
+      } catch (e) {
+        that.spinner.fail(`${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
+        return null
+      }
+    }
+
+    return peserta
+  
+
   }
+
   return null
 
 }
