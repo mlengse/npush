@@ -107,3 +107,4 @@ credentials.json
 token.json
 tmp
 db
+!db/db.json
