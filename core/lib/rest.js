@@ -570,7 +570,7 @@ exports._getRiwayatKunjungan = async ({ that, peserta, bln, count }) => {
         headers
       })
 
-      that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu}, riws ${riws.length}, count ${count}, ${riws.length < count}`)
+      that.spinner.start(`fetch riwayat kunjungan ${peserta.nama ? peserta.nama : peserta.noKartu}, riws ${riws.length}, count ${count ? count : 0}, ${riws.length < count}`)
       let res = await instance.get(`/kunjungan/peserta/${peserta.noKartu}`)
       // that.spinner.succeed()
       if (res && res.data && res.data.response && res.data.response.list.length) {
