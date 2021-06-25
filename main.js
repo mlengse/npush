@@ -97,8 +97,8 @@ module.exports = async (isPM2) => {
                     kunjDM.push(peserta.noKartu)
                     // app.spinner.succeed(`kunj DM: ${kunjDM.length} | ${re.tglKunjungan} | ${re.peserta.noKartu} | ${re.noKunjungan} | ${peserta.pstProl} | ${mcu.gulaDarahPuasa}`)
                   } 
-                } else if (listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
-                  listPstDM.push(peserta.noKartu)
+                // } else if (listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
+                  // listPstDM.push(peserta.noKartu)
                 }
               }
             }
@@ -109,11 +109,19 @@ module.exports = async (isPM2) => {
                 if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
                   kunjHT.indexOf(peserta.noKartu) === -1 && kunjHT.push(peserta.noKartu)
                   isHTControlled = true
-                } else if (listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
-                  listPstHT.push(peserta.noKartu)
+                // } else if (listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
+                  // listPstHT.push(peserta.noKartu)
                 }
               }
               // console.log(peserta.noKartu, kunjHT.length, listPstHT.length)
+            }
+
+            if(res.length < 3 && !isDMControlled && !isHTControlled && kunjHT.indexOf(peserta.noKartu) === -1 && kunjDM.indexOf(peserta.noKartu) === -1 && listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
+              if(isDM) {
+                listPstDM.push(peserta.noKartu)
+              } else if (isHT) {
+                listPstHT.push(peserta.noKartu)
+              }
             }
 
             re.statusPulang && re.statusPulang.kdStatusPulang === '4' && rujukan++
