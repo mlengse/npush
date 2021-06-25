@@ -116,15 +116,17 @@ module.exports = async (isPM2) => {
               // console.log(peserta.noKartu, kunjHT.length, listPstHT.length)
             }
 
-            if(res.length < 3 && !isDMControlled && !isHTControlled && kunjHT.indexOf(peserta.noKartu) === -1 && kunjDM.indexOf(peserta.noKartu) === -1 && listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
-              if(isDM) {
-                listPstDM.push(peserta.noKartu)
-              } else if (isHT) {
-                listPstHT.push(peserta.noKartu)
-              }
-            }
+
 
             re.statusPulang && re.statusPulang.kdStatusPulang === '4' && rujukan++
+          }
+        }
+
+        if(res && res.length && res.length < 3 && !isDMControlled && !isHTControlled && kunjHT.indexOf(peserta.noKartu) === -1 && kunjDM.indexOf(peserta.noKartu) === -1 && listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
+          if(isDM) {
+            listPstDM.push(peserta.noKartu)
+          } else if (isHT) {
+            listPstHT.push(peserta.noKartu)
           }
         }
       }
