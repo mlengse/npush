@@ -77,7 +77,7 @@ module.exports = async (isPM2) => {
               }
               return kunj
             })
-            if((re.diagnosa1.kdDiag === 'E11.9' || re.diagnosa2.kdDiag === 'E11.9' || re.diagnosa3.kdDiag === 'E11.9' || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11') && 100*kunjDM.length/dmAll < 5){
+            if((re.diagnosa1.kdDiag === 'E11.9' || re.diagnosa2.kdDiag === 'E11.9' || re.diagnosa3.kdDiag === 'E11.9' || re.diagnosa1.kdDiag === 'E11' || re.diagnosa2.kdDiag === 'E11' || re.diagnosa3.kdDiag === 'E11') && 100*kunjDM.length/dmAll < 6){
               isDM = true
               if(peserta && peserta.pstProl && peserta.pstProl.includes('DM')){
                 let mcu = await app.getMCU({
@@ -103,7 +103,7 @@ module.exports = async (isPM2) => {
               }
             }
 
-            if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10') && 100*kunjHT.length/htAll < 5 ){
+            if((re.diagnosa1.kdDiag === 'I10' || re.diagnosa2.kdDiag === 'I10' || re.diagnosa3.kdDiag === 'I10') && 100*kunjHT.length/htAll < 6 ){
               isHT = true
               if(peserta && peserta.pstProl && peserta.pstProl.includes('HT')){
                 if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
@@ -141,9 +141,9 @@ module.exports = async (isPM2) => {
 
     let inputHT = 0
     htAll = htAll < app.config.HT ? app.config.HT : htAll
-    if(100*kunjHT.length/htAll < 5){
+    if(100*kunjHT.length/htAll < 6){
       let htNum = kunjHT.length
-      while (100*htNum/htAll < 5 ){
+      while (100*htNum/htAll < 6 ){
         inputHT++
         htNum++
       }
@@ -151,9 +151,9 @@ module.exports = async (isPM2) => {
 
     let inputDM = 0
     dmAll = dmAll < app.config.DM ? app.config.DM : dmAll
-    if(100*kunjDM.length/dmAll < 5){
+    if(100*kunjDM.length/dmAll < 6){
       let dmNum = kunjDM.length
-      while (100*dmNum/dmAll < 5 ){
+      while (100*dmNum/dmAll < 6 ){
         inputDM++
         dmNum++
       }
