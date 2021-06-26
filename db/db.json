@@ -97,10 +97,10 @@
       "id": "20210720"
     },
     {
-      "date": "10 Agustus 2021",
+      "date": "11 Agustus 2021",
       "ket": "Tahun Baru Hijriyah",
       "tahun": "2021",
-      "id": "20210810"
+      "id": "20210811"
     },
     {
       "date": "17 Agustus 2021",
@@ -109,22 +109,16 @@
       "id": "20210817"
     },
     {
-      "date": "18 Oktober 2021",
+      "date": "20 Oktober 2021",
       "ket": "Maulid Nabi",
       "tahun": "2021",
-      "id": "20211018"
+      "id": "20211020"
     },
     {
       "date": "25 Desember 2021",
       "ket": "Hari Natal",
       "tahun": "2021",
       "id": "20211225"
-    },
-    {
-      "date": "27 Desember 2020",
-      "ket": "Cuti Bersama",
-      "tahun": "2020",
-      "id": "20201227"
     }
   ]
 }
