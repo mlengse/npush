@@ -260,16 +260,22 @@ module.exports = async (isPM2) => {
       if(pendaftaran && pendaftaran.det && pendaftaran.det.noKartu && pendaftaran.det.noKartu.length === 13) {
         noT++
 
-        let adakahDaft = kunjBlnIni.filter( ({ tgldaftar, peserta: { noKartu }}) => noKartu === pendaftaran.det.noKartu )// && tgldaftar === pendaftaran.det.noKartu)
+        let adakahDaft = kunjBlnIni.filter( ({ tgldaftar, peserta: { noKartu }}) => noKartu === pendaftaran.det.noKartu && tgldaftar === pendaftaran.det.tglDaftar)
+        let num = 0
 
-        if(adakahDaft.length) for ([id, ada] of Object.entries(adakahDaft)) {
-          app.spinner.succeed(`${Number(id)+1} dari ${adakahDaft.length} ${ada.tgldaftar}, ${pendaftaran.det.tglDaftar}, ${pendaftaran.det.noKartu}, ${ada.kunjSakit ? `sakit` : `sehat`}`)
-          app.spinner.succeed(`${ada.diagnosa1 && ada.diagnosa1.kdDiag ? `${ada.diagnosa1.kdDiag}, `:''}${ada.diagnosa2 && ada.diagnosa2.kdDiag ? `${ada.diagnosa2.kdDiag}, `:''}${ada.diagnosa3 && ada.diagnosa3.kdDiag ? `${ada.diagnosa3.kdDiag}, `:''}td: ${ada.sistole}/${ada.diastole}${ada.gulaDarahPuasa ? `, gdp: ${ada.gulaDarahPuasa}`:''}`)
+        while(adakahDaft.length && num < 10) {
+          for ([id, ada] of Object.entries(adakahDaft)) {
+            app.spinner.succeed(`${Number(id)+1} dari ${adakahDaft.length} ${ada.tgldaftar}, ${pendaftaran.det.tglDaftar}, ${pendaftaran.det.noKartu}, ${ada.kunjSakit ? `sakit` : `sehat`}`)
+            app.spinner.succeed(`${ada.diagnosa1 && ada.diagnosa1.kdDiag ? `${ada.diagnosa1.kdDiag}, `:''}${ada.diagnosa2 && ada.diagnosa2.kdDiag ? `${ada.diagnosa2.kdDiag}, `:''}${ada.diagnosa3 && ada.diagnosa3.kdDiag ? `${ada.diagnosa3.kdDiag}, `:''}td: ${ada.sistole}/${ada.diastole}${ada.gulaDarahPuasa ? `, gdp: ${ada.gulaDarahPuasa}`:''}`)
+          }
+          pendaftaran.det.tglDaftar = await app.getTglDaftar()
+          adakahDaft = kunjBlnIni.filter( ({ tgldaftar, peserta: { noKartu }}) => noKartu === pendaftaran.det.noKartu && tgldaftar === pendaftaran.det.tglDaftar)
+          num++
         }
 
         app.spinner.succeed(`${noT}: ${pendaftaran.det.tglDaftar} | ${pendaftaran.det.noKartu} | ${adakahDaft.length ? `ada` : 'tidak ada'}`)
 
-        if(!adakahDaft.length || pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht' ){
+        if(!adakahDaft.length) { // || pendaftaran.ket === 'dm' || pendaftaran.ket === 'ht' ){
           app.spinner.start(`add pendaftaran: ${pendaftaran.det.noKartu}`)
           let daftResponse, kunjResponse, mcuResponse 
           

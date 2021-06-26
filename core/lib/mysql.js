@@ -17,9 +17,9 @@ exports._poolClose = async ({ that }) => {
 }
 
 exports._connect = async ({ that , query }) => {
-  if(!that.connection && process.env.MYSQL_USER){
+  if(!that.connection || (that.connection && that.connection.state === 'disconnected') && process.env.MYSQL_USER){
     // connection  = mysql.createPool({
-    that.connection  = mysql.createConnection({
+    that.connection = mysql.createConnection({
       // connectionLimit : 500,
       host: that.config.MYSQL_HOST,
       password: that.config.MYSQL_PASSWORD,
@@ -30,7 +30,7 @@ exports._connect = async ({ that , query }) => {
   if(!that.connection) return []
   that.spinner.start(`query: ${query}`)
   if(query.toLowerCase().includes('undefined')) {
-    that.spinner.succeed(`query: ${query}`)
+    that.spinner.fail(`query: ${query}`)
   }
   return await new Promise( (resolve, reject) => {
     that.connection.query(query, (err, results) => {
