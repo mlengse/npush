@@ -166,7 +166,7 @@ module.exports = async (isPM2) => {
       app.spinner.succeed(`tgl ${app.now} s.d. ${app.end}; sisa hari: ${sisaHari}`);
       const pembagi = sisaHari > 2 ? sisaHari - 2 : 0
 
-      if(pembagi > 0 || kekurangan > 0 || inputSakit || inputHT) {
+      if(pembagi > 0 && (kekurangan > 0 || inputSakit || inputHT)) {
         let akanDiinput = pembagi < 1 ? Math.floor(kekurangan) : (Math.floor((kekurangan / pembagi) * 0.6) || inputSakit || (inputHT) || (inputDM))
 
         if(!app.config.RPPT){
