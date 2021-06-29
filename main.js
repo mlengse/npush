@@ -95,10 +95,7 @@ module.exports = async (isPM2) => {
                   isDMControlled = true
                   if(kunjDM.indexOf(peserta.noKartu) === -1){
                     kunjDM.push(peserta.noKartu)
-                    // app.spinner.succeed(`kunj DM: ${kunjDM.length} | ${re.tglKunjungan} | ${re.peserta.noKartu} | ${re.noKunjungan} | ${peserta.pstProl} | ${mcu.gulaDarahPuasa}`)
                   } 
-                // } else if (listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
-                  // listPstDM.push(peserta.noKartu)
                 }
               }
             }
@@ -109,20 +106,14 @@ module.exports = async (isPM2) => {
                 if(re.sistole < 130 && re.sistole > 109 && re.diastole < 90) {
                   kunjHT.indexOf(peserta.noKartu) === -1 && kunjHT.push(peserta.noKartu)
                   isHTControlled = true
-                // } else if (listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
-                  // listPstHT.push(peserta.noKartu)
                 }
               }
-              // console.log(peserta.noKartu, kunjHT.length, listPstHT.length)
             }
-
-
-
             re.statusPulang && re.statusPulang.kdStatusPulang === '4' && rujukan++
           }
         }
 
-        if(res && res.length && res.length < 3 && !isDMControlled && !isHTControlled && kunjHT.indexOf(peserta.noKartu) === -1 && kunjDM.indexOf(peserta.noKartu) === -1 && listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
+        if(res && res.length && res.length < 2 && !isDMControlled && !isHTControlled && kunjHT.indexOf(peserta.noKartu) === -1 && kunjDM.indexOf(peserta.noKartu) === -1 && listPstDM.indexOf(peserta.noKartu) === -1 && listPstHT.indexOf(peserta.noKartu) === -1){
           if(isDM) {
             listPstDM.push(peserta.noKartu)
           } else if (isHT) {
@@ -134,9 +125,6 @@ module.exports = async (isPM2) => {
       isHT && htAll++
       isDMControlled && kunjDM.indexOf(peserta.noKartu) === -1 && kunjDM.push(peserta.noKartu)
       isDM && dmAll++
-      // app.spinner.succeed(`${peserta.noKartu}`)
-      // app.spinner.succeed(`kunjHT ${kunjHT.length}/${htAll}=${kunjHT.length*100/htAll}% listHT ${listPstHT.length} `)
-      // app.spinner.succeed(`kunjDM ${kunjDM.length}/${dmAll}=${kunjDM.length*100/dmAll}% listDM ${listPstDM.length} `)
     }
 
     let inputHT = 0

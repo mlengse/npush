@@ -10,13 +10,13 @@ const mysql = require('mysql')
 // });
 
 exports._poolClose = async ({ that }) => {
-  this.spinner.start('close mysql connection')
+  that.spinner.start('close mysql connection')
 
   if(!!that.connection) {
     await that.connection.end()
     that.connection = null
   }
-  this.spinner.succeed()
+  that.spinner.succeed()
 }
 
 exports._connect = async ({ that , query }) => {
