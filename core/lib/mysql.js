@@ -10,10 +10,13 @@ const mysql = require('mysql')
 // });
 
 exports._poolClose = async ({ that }) => {
+  this.spinner.start('close mysql connection')
+
   if(!!that.connection) {
     await that.connection.end()
     that.connection = null
   }
+  this.spinner.succeed()
 }
 
 exports._connect = async ({ that , query }) => {
@@ -32,9 +35,12 @@ exports._connect = async ({ that , query }) => {
   if(query.toLowerCase().includes('undefined')) {
     that.spinner.fail(`query: ${query}`)
   }
-  return await new Promise( (resolve, reject) => {
+  return await new Promise( resolve => {
     that.connection.query(query, (err, results) => {
-      err ? reject(err) : null;
+      if(err && err.code === 'PROTOCOL_CONNECTION_LOST') {
+        that.spinner.fail('mysql connection close')
+        resolve(that.connect({ query }))
+      }
       // that.spinner.succeed(`query: ${query}`)
       resolve(results)
     })

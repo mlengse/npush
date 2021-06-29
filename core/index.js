@@ -19,15 +19,16 @@ module.exports = class Core {
   }
 
   async close(isPM2){
-    this.spinner.succeed('close apps')
+    await this.poolClose()
+    if(!isPM2){
+      await this.browser.close()
+    } else {
+      if(this.browser.isConnected()) {
+        await this.browser.disconnect()
+      }
+    } 
     this.spinner.stop()
-    // if(!isPM2){
-    //   await this.browser.close()
-    // } else {
-    //   if(this.browser.isConnected()) {
-    //     await this.browser.disconnect()
-    //   }
-    // } 
+    this.spinner.succeed('close apps')
   }
 
   
