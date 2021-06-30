@@ -16,7 +16,7 @@ exports._poolClose = async ({ that }) => {
     await that.connection.end()
     that.connection = null
   }
-  that.spinner.succeed()
+  that.spinner.succeed(`mysql connection closed: ${new Date()}`)
 }
 
 exports._connect = async ({ that , query }) => {
