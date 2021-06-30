@@ -24,7 +24,7 @@ module.exports = class Core {
       !isPM2 && await this.browser.close()
       isPM2 && this.browser.isConnected() && await this.browser.disconnect()
     } 
-    this.spinner.stop()
+    // this.spinner.stop()
     this.spinner.succeed('close apps')
   }
 
