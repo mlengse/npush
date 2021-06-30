@@ -317,7 +317,7 @@ module.exports = async (isPM2) => {
 
     await app.close(isPM2)
 
-    console.log(`process done: ${new Date()}`)
+    console.log(`main scheduled process done: ${new Date()}`)
   }catch(e){
     console.error(`process error: ${new Date()} ${JSON.stringify(e, Object.getOwnPropertyNames(e))}`)
 

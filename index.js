@@ -9,7 +9,7 @@ console.log(`set cron push: ${menit} ${jamPagi},${jamSore} * * * ${new Date()}`)
 process.env.SHEET_ID && console.log(`set cron sheet: ${Math.floor(menit*3/5)} 8-17 * * 1-6 ${new Date()}`)
 
 schedule(`${menit} ${jamPagi},${jamSore} * * *`, ()=>{
-	console.log(`running scheduled app: ${new Date()}`)
+	console.log(`running scheduled main app: ${new Date()}`)
 	init(true)
 })
 
